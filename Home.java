@@ -1,31 +1,17 @@
 package dicomviewerui;
 
-import java.awt.EventQueue;
-import javax.swing.*;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.io.FileFilter;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
 import java.util.List;
 
-import java.awt.event.ActionEvent;
-
-import java.awt.Font;
-import javax.swing.JTable;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
-import java.awt.Color;
-
-
-import javax.swing.JProgressBar;
 import javax.swing.table.DefaultTableModel;
-
-
 
 import dicomviewer.Image;
 import dicomviewer.ImageDAO;
@@ -33,86 +19,49 @@ import dicomviewer.PatientStudy;
 import dicomviewer.PatientStudyDAO;
 import dicomviewer.Series;
 import dicomviewer.SeriesDAO;
-
-import javax.swing.JScrollPane;
-import javax.swing.JFileChooser;
-
-public class Home extends JFrame {
-
-	private JPanel contentPane;
+ 
+public class Home implements ActionListener, Runnable {    
+	private static JPanel contentPane;
 	private static JTable tSeries;
 	private static JTable tImage;
 	private static JTable tPatient;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Home frame = new Home();
-					frame.setVisible(true);
-
-					//dispSeries();
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the frame.
-	 */
-	public Home() {
-		setTitle("Dicom Viewer");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1058, 667);
+    static JProgressBar jpb;
+    static Home _this;
+    private enum Actions {
+        IMPORTFILE,
+        IMPORTFOLDER
+      }
+     
+    public Home (){
+       _this = this;
+    }
+     
+    private static void createAndShowGUI(){
+    	JFrame frame = new JFrame ();
+		frame.setVisible(true);
+    	frame.setTitle("Dicom Viewer");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setBounds(100, 100, 1058, 667);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
+		frame.setContentPane(contentPane);
 		contentPane.setLayout(null);
 
 		// IMPORT FILE
 
 		JButton btnImportFile = new JButton("Import File");
 		btnImportFile.setFont(new Font("Times New Roman", Font.PLAIN, 14));
-		btnImportFile.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				JFileChooser jFile = new JFileChooser();
-				FileNameExtensionFilter fileFilter=new FileNameExtensionFilter(".dcm", "dcm");
-				jFile.setFileFilter(fileFilter);
-				jFile.showDialog(null, "Import");
-
-				JProgressBar progressBar = new JProgressBar();
-				progressBar.setBounds(10, 572, 813, 25);
-				contentPane.add(progressBar);
-				progressBar.setVisible(true);
-
-				// File path = jfile.getSelectedFile();
-				// String trackPath = path.getAbsolutePath();
-				// tLocation.setText(trackPath);
-
-			}
-		});
+		btnImportFile.setActionCommand(Actions.IMPORTFILE.name());
+		btnImportFile.addActionListener(_this);	
 		btnImportFile.setBounds(0, 11, 108, 23);
 		contentPane.add(btnImportFile);
 
 		// IMPORT FOLDER
 
 		JButton btnImportFolder = new JButton("Import Folder");
-		btnImportFolder.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				JFileChooser jFile = new JFileChooser();
-				jFile.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				jFile.showDialog(null, "Import");
-				
-				// jfile.getCurrentDirectory());
-			}
-		});
+		btnImportFolder.setActionCommand(Actions.IMPORTFOLDER.name());
+		btnImportFolder.addActionListener(_this);
 		btnImportFolder.setFont(new Font("Times New Roman", Font.PLAIN, 14));
 		btnImportFolder.setBounds(118, 11, 115, 23);
 		contentPane.add(btnImportFolder);
@@ -132,7 +81,7 @@ public class Home extends JFrame {
 		JButton btnExit = new JButton("Exit");
 		btnExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				dispose();
+				frame.dispose();
 			}
 		});
 		btnExit.setFont(new Font("Times New Roman", Font.PLAIN, 14));
@@ -147,38 +96,8 @@ public class Home extends JFrame {
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(10, 101, 548, 455);
 		contentPane.add(scrollPane);
-		DefaultTableModel dtmPatient = new DefaultTableModel(new String[] { "Patient Id", "Patient Name", "DOB",
-				"Accession Number", "Study Id", "Study Description", "Study Date" }, 0);
-		dtmPatient.setRowCount(0);
-
-		tPatient.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tPatient.setModel(dtmPatient);
-		try {
-			List<PatientStudy> list = PatientStudyDAO.viewAllPatientStudy();
-			for (int i = 0; i < list.size(); i++) {
-				Object row[] = { list.get(i).getPatientId(), list.get(i).getPatientName(), list.get(i).getPatientDOB(),
-						list.get(i).getAccessionNumber(), list.get(i).getStudyId(), list.get(i).getStudyDescription(),
-						list.get(i).getStudyDateTime() };
-				dtmPatient.addRow(row);
-				tPatient.setModel(dtmPatient);
-
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		// final TableColumnModel columnModel = tPatient.getColumnModel();
-		// for (int column = 0; column < tPatient.getColumnCount(); column++) {
-		// int width = 15; // Min width
-		// for (int row = 0; row < tPatient.getRowCount(); row++) {
-		// TableCellRenderer renderer = tPatient.getCellRenderer(row, column);
-		// Component comp = tPatient.prepareRenderer(renderer, row, column);
-		// width = Math.max(comp.getPreferredSize().width +1 , width);
-		// }
-		// if(width > 300)
-		// width=300;
-		// columnModel.getColumn(column).setPreferredWidth(width);
-		// }
-		// tPatient.setBounds(10, 1000, 10000, 800);
+		dispPatient();
+		
 		scrollPane.setViewportView(tPatient);
 		tPatient.setBorder(new LineBorder(new Color(0, 0, 0)));
 
@@ -192,10 +111,9 @@ public class Home extends JFrame {
 		dtmSeries.setRowCount(0);
 		tSeries = new JTable();
 		tSeries.setRowSelectionAllowed(true);
-		// tSeries.setCellSelectionEnabled(true);
+		
 
-		tSeries.setModel(dtmSeries);
-		// GET SELECTED ROE I PATIENT TABLE AND PRINT IN SERIES
+
 		tSeries.setAutoCreateRowSorter(true);
 		tSeries.setUpdateSelectionOnSort(true);
 		scrollPane_1.setViewportView(tSeries);
@@ -210,15 +128,9 @@ public class Home extends JFrame {
 				new String[] { "Image Number", "Image Type", "Rows", "Columns", "Bits Allocated", "Bits Stored" }, 0);
 		dtmImage.setRowCount(0);
 		tImage = new JTable();
-		tImage.setModel(dtmImage);
+
 		tImage.setRowSelectionAllowed(true);
-		// TableColumn column = null;
-		// for (int i = 0; i < 6; i++) {
-		// column = tImage.getColumnModel().getColumn(i);
-		//
-		// column.setPreferredWidth(100);
-		//
-		// }
+		
 		tImage.setAutoCreateRowSorter(true);
 		tImage.setUpdateSelectionOnSort(true);
 		scrollPane_2.setViewportView(tImage);
@@ -270,12 +182,22 @@ public class Home extends JFrame {
 		lblSeriesDetails.setOpaque(true);
 		lblSeriesDetails.setHorizontalAlignment(SwingConstants.CENTER);
 		lblSeriesDetails.setBackground(Color.LIGHT_GRAY);
-		lblSeriesDetails.setBounds(578, 70, 454, 20);
+		lblSeriesDetails.setBounds(568, 70, 464, 20);
 		contentPane.add(lblSeriesDetails);
 		
+	
+		jpb=new JProgressBar();
+		jpb.setBounds(58, 603, 830, 14);
+		jpb.setMinimum(0);
+		jpb.setMaximum(100);
+		jpb.setStringPainted(true);
+		contentPane.add(jpb);
+		jpb.setVisible(true);
+		
+		;
 		tPatient.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent event) { 
-				// String studyId = tPatient.getModel().getValueAt(tPatient.getSelectedRow(), 4).toString();
+				
 				dispSeries();}
 
 		});
@@ -288,9 +210,7 @@ public class Home extends JFrame {
 		});
 			
 	}
-	
-
-	public static void dispSeries() {
+    public static void dispSeries() {
 		try {
 
 			
@@ -312,28 +232,48 @@ public class Home extends JFrame {
 							dtmSeries.addRow(rowSeries);
 							tSeries.setModel(dtmSeries);
 							dispImage();
-							//dispImage(studyId);
+							
 
 						}
 						tSeries.setVisible(true);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						//e.printStackTrace();
+						
 					}
 					
 				
 
-		} catch (
-
-		Exception ex) {
-			//ex.printStackTrace();
+		} catch (Exception ex) {
+			
 		}
 	}
+    
+    public static void dispPatient()
+    {
+    	DefaultTableModel dtmPatient = new DefaultTableModel(new String[] { "Patient Id", "Patient Name", "DOB",
+				"Accession Number", "Study Id", "Study Description", "Study Date" }, 0);
+		dtmPatient.setRowCount(0);
+
+		tPatient.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tPatient.setModel(dtmPatient);
+		try {
+			List<PatientStudy> list = PatientStudyDAO.viewAllPatientStudy();
+			for (int i = 0; i < list.size(); i++) {
+				Object row[] = { list.get(i).getPatientId(), list.get(i).getPatientName(), list.get(i).getPatientDOB(),
+						list.get(i).getAccessionNumber(), list.get(i).getStudyId(), list.get(i).getStudyDescription(),
+						list.get(i).getStudyDateTime() };
+				dtmPatient.addRow(row);
+				tPatient.setModel(dtmPatient);
+
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+    }
 
 	public static void dispImage() {
 		try {
 			
-					//String studyId = tPatient.getModel().getValueAt(tPatient.getSelectedRow(), 4).toString();
+					
 			
 					String studyId = tPatient.getModel().getValueAt(tPatient.getRowSorter().convertRowIndexToModel(tPatient.getSelectedRow()), 4).toString();
 					DefaultTableModel dtmImage = new DefaultTableModel(
@@ -357,18 +297,101 @@ public class Home extends JFrame {
 						}
 						tImage.setVisible(true);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						//e.printStackTrace();
+						
 					}
-					//System.out.println(String.valueOf(tableProducts.getModel()
-//					  .getValueAt(tableProducts.getRowSorter().convertRowIndexToModel(
-//							  tableProducts.getSelectedRow()), 1)));
-
-				
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
+					
+				} catch (Exception e) {
+			
 		}
-	}
-}
+	 
+    }
+     
+    public static void main(String args[]){
+     
+    	Home t = new Home();  
+   	   new Thread(t).start();
+   	javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+            createAndShowGUI();
+        }
+    });
+       
+    }
+     
+    public void actionPerformed(ActionEvent ae)
+    {            
+   
+        if(ae.getActionCommand()==Actions.IMPORTFILE.name())
+        {
+        JFileChooser j=new JFileChooser();
+        FileNameExtensionFilter fileFilter=new FileNameExtensionFilter(".dcm", "dcm");
+		j.setFileFilter(fileFilter);
+		j.showDialog(jpb, "Import");
+		File path = j.getSelectedFile();
+	    Long l=new Long(path.length());
+	    jpb.setMaximum(l.intValue());
+        approveSelection(j);
+        }
+        else if(ae.getActionCommand()==Actions.IMPORTFOLDER.name())
+        {
+        	JFileChooser j=new JFileChooser();
+        	j.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			j.showDialog(jpb, "Import");
+			File path = j.getSelectedFile();
+		    Long l=new Long(path.length());
+		    jpb.setMaximum(l.intValue());
+			approveSelection(j);
+        }
+    }
+    public  void approveSelection(JFileChooser j)
+    {
+    	synchronized(this){notifyAll();}
+    	
+    	//run();
+    }
+// worker thread 
+    public void run(){
+        while(true){
+         // wait for the signal from the GUI
+            try{synchronized(this){wait();}}
+            catch (InterruptedException e){
+            	e.printStackTrace();
+            }
+            int limit=jpb.getMaximum();
+            System.out.println(limit);
+         // simulate some long-running process like parsing a large file
+            for (int i = 1; i <= limit; i=i*5){
+            	
+               jpb.setValue(i);
+               System.out.println("actionPerformed sets jpb value to: "+i);
+               try{Thread.sleep(1500);
+               if (i >= 0 && i < 10) 
+                   jpb.setString("wait for sometime"); 
+               else if(i>10 && i<2000)
+            	   jpb.setString("Importing started");
+               		
+               else
+                   jpb.setString("Importing ....."); 
+               }
+              
+            
+               // make the process last a while
+               catch (InterruptedException e){
+            	   e.printStackTrace();
+               }
+           }
+            jpb.setString("Importing completed");
+            jpb.setValue(limit);
+            try {
+       		if(jpb.getValue()==limit)
+       			{Thread.sleep(1000);
+       			jpb.setVisible(false); 
+       			}
+       		}
+       	   catch (InterruptedException e){
+      	   e.printStackTrace();
+           }
+       		 
+        }
+    }
+}	
