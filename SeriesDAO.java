@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class SeriesDAO {
@@ -92,28 +91,26 @@ public class SeriesDAO {
 		}
 	}
 //  OK
-	public static List<Series> filter(String colName, String lowValue, String highValue) throws Exception {
+	public static List<Series> filter(String colName, String value) throws Exception {
 
 		PreparedStatement pStmt = null;
 		Connection con = null;
 		try {
 			con = DbConnector.getConnection();
-			pStmt = con.prepareStatement( "select * from Series WHERE " + colName +  "::int BETWEEN " + Integer.parseInt(lowValue) + " AND " + Integer.parseInt(highValue));
-//			pStmt.setString(1, colName);
-//			pStmt.setString(2, lowValue);
-//			pStmt.setString(3, highValue);
+			pStmt = con.prepareStatement( "select * from Series WHERE " + colName +  " LIKE '%" + value + "%'");
+
 			ResultSet rs = pStmt.executeQuery();
 
 			ArrayList<Series> seriesList = new ArrayList<>();
 			boolean flag = false;
 			while (rs.next()) {
 				flag = true;
-				Series seies = new Series(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4),
-						rs.getString(5));
-				seriesList.add(seies);
+				Series series = new Series(rs.getString(1), rs.getString(2), rs.getString(3),
+						rs.getString(4), rs.getString(5));
+				seriesList.add(series);
 			}
 			if (!flag) {
-				throw new Exception("Study Not Found");
+				throw new Exception("Series Not Found");
 			}
 			return seriesList;
 		} catch (Exception ex) {
@@ -122,9 +119,9 @@ public class SeriesDAO {
 			pStmt.close();
 			con.close();
 		}
-
+		
 	}
-
+	
 	public static void main(String args[]) {
 		try {
 //			create();
@@ -143,7 +140,13 @@ public class SeriesDAO {
 //				Series srs = series.get(--size);
 //				System.out.println(srs.getModality());
 //			}
-
+			
+//			ArrayList<Series> stdList = (ArrayList<Series>)filter("seriesId", "k");
+//			int size = stdList.size();
+//			while(size>=0) {
+//				Series pst = stdList.get(--size);
+//				System.out.println(pst.getSeriesId());
+//			}
 
 		} catch (Exception ex) {
 			ex.printStackTrace();

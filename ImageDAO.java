@@ -107,41 +107,6 @@ public class ImageDAO {
 	}
 
 	// OK
-	public static List<Image> filter(String colName, String lowValue, String highValue) throws Exception {
-
-		PreparedStatement pStmt = null;
-		Connection con = null;
-		try {
-			con = DbConnector.getConnection();
-			pStmt = con.prepareStatement("select * from Image WHERE " + colName + "::int BETWEEN "
-					+ Integer.parseInt(lowValue) + " AND " + Integer.parseInt(highValue));
-			// pStmt.setString(1, colName);
-			// pStmt.setString(2, lowValue);
-			// pStmt.setString(3, highValue);
-			ResultSet rs = pStmt.executeQuery();
-
-			ArrayList<Image> imageList = new ArrayList<>();
-			boolean flag = false;
-			while (rs.next()) {
-				flag = true;
-				Image image = new Image(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4),
-						rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(7));
-				imageList.add(image);
-			}
-			if (!flag) {
-				throw new Exception("Image Not Found");
-			}
-			return imageList;
-		} catch (Exception ex) {
-			throw ex;
-		} finally {
-			pStmt.close();
-			con.close();
-		}
-
-	}
-
-	// OK
 	public static LinkedHashMap<String, String> details(String stdyId, String srsId, String ImgNumber)
 			throws Exception {
 		Connection con = null;
@@ -307,6 +272,37 @@ public class ImageDAO {
 		return compTable;
 	}
 
+	public static List<Image> filter(String colName, String value) throws Exception {
+
+		PreparedStatement pStmt = null;
+		Connection con = null;
+		try {
+			con = DbConnector.getConnection();
+			pStmt = con.prepareStatement( "select * from Image WHERE " + colName +  " LIKE '%" + value + "%'");
+
+			ResultSet rs = pStmt.executeQuery();
+
+			ArrayList<Image> imageList = new ArrayList<>();
+			boolean flag = false;
+			while (rs.next()) {
+				flag = true;
+				Image image = new Image(rs.getString(1), rs.getString(2), rs.getString(3),
+						rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8));
+				imageList.add(image);
+			}
+			if (!flag) {
+				throw new Exception("Image Not Found");
+			}
+			return imageList;
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			pStmt.close();
+			con.close();
+		}
+		
+	}
+	
 	public static void main(String args[]) {
 		try {
 			// create();
@@ -336,16 +332,23 @@ public class ImageDAO {
 			// System.out.println(key + " " + imgDetails.get(key) + "\n");
 			// }
 
-			DefaultTableModel compImg = compareImage("std1", "srs1", "img1", "std1", "srs1", "img2");
-			System.out.println(compImg.getColumnCount());
-			System.out.println(compImg.getRowCount());
-
-			// compImg.getValueAt(1, 1);
-
-			for (int i = 0; i < compImg.getRowCount(); ++i) {
-				System.out.print(compImg.getValueAt(i, 0).toString());
-				System.out.print("   " + compImg.getValueAt(i, 1).toString());
-				System.out.print("   " + compImg.getValueAt(i, 2).toString() + "\n");
+//			DefaultTableModel compImg = compareImage("std1", "srs1", "img1", "std1", "srs1", "img2");
+//			System.out.println(compImg.getColumnCount());
+//			System.out.println(compImg.getRowCount());
+//
+//			// compImg.getValueAt(1, 1);
+//
+//			for (int i = 0; i < compImg.getRowCount(); ++i) {
+//				System.out.print(compImg.getValueAt(i, 0).toString());
+//				System.out.print("   " + compImg.getValueAt(i, 1).toString());
+//				System.out.print("   " + compImg.getValueAt(i, 2).toString() + "\n");
+//			}
+			
+			ArrayList<Image> stdList = (ArrayList<Image>)filter("imageNumber", "o");
+			int size = stdList.size();
+			while(size>=0) {
+				Image pst = stdList.get(--size);
+				System.out.println(pst.getImageNumber());
 			}
 
 		} catch (Exception ex) {

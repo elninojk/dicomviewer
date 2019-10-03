@@ -125,17 +125,14 @@ public class PatientStudyDAO {
 		}
 	}
 
-	public static List<PatientStudy> filter(String colName, String lowValue, String highValue) throws Exception {
+	public static List<PatientStudy> filter(String colName, String value) throws Exception {
 
 		PreparedStatement pStmt = null;
 		Connection con = null;
 		try {
 			con = DbConnector.getConnection();
-			pStmt = con.prepareStatement( "select * from patientStudy WHERE " + colName +  "::int BETWEEN " + Integer.parseInt(lowValue) + " AND " + Integer.parseInt(highValue));
+			pStmt = con.prepareStatement( "select * from PatientStudy WHERE " + colName +  " LIKE '%" + value + "%'");
 
-			//pStmt.setString(1, colName);
-//			pStmt.setInt(2, Integer.parseInt(lowValue));
-//			pStmt.setInt(3, Integer.parseInt(highValue));
 			ResultSet rs = pStmt.executeQuery();
 
 			ArrayList<PatientStudy> pStudyList = new ArrayList<>();
@@ -159,17 +156,25 @@ public class PatientStudyDAO {
 		
 	}
 
+	
 	public static void main(String args[]) {
 		try {
 //			create();
 //			insert(new PatientStudy("p2", "wan", "23344555", "3333", "5575", "hgh ghg h", "4235456435" ));
 
-			ArrayList<PatientStudy> stdList = (ArrayList<PatientStudy>)filter("accessionnumber", "23","5555");
-			int size = stdList.size();
-			while(size>=0) {
-				PatientStudy pst = stdList.get(--size);
-				System.out.println(pst.getPatientDOB());
-			}
+//			ArrayList<PatientStudy> stdList = (ArrayList<PatientStudy>)filterIntegers("accessionnumber", "23","5555");
+//			int size = stdList.size();
+//			while(size>=0) {
+//				PatientStudy pst = stdList.get(--size);
+//				System.out.println(pst.getAccessionNumber());
+//			}
+			
+//			ArrayList<PatientStudy> stdList = (ArrayList<PatientStudy>)filter("accessionnumber", "7");
+//			int size = stdList.size();
+//			while(size>=0) {
+//				PatientStudy pst = stdList.get(--size);
+//				System.out.println(pst.getAccessionNumber());
+//			}
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();
