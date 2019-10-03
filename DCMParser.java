@@ -3,100 +3,70 @@ package dcmparser;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 
-import com.sun.xml.bind.v2.schemagen.xmlschema.List;
+import daoclasses.ImageDAO;
+import daoclasses.PatientStudyDAO;
+import daoclasses.SeriesDAO;
+import ui.home;
 
 public class DCMParser {
-	 static ArrayList<String> patient;
+	
+	static DicomInputStream din;
 	// dicom file parser
-	public static void dcmFileParser(File f)  throws IOException, ClassNotFoundException, SQLException
-	{
-		
-		DicomInputStream din = new DicomInputStream(f);				
+	public static void dcmFileParser(File f)  throws Exception
+	{		
+		din = new DicomInputStream(f);				
 		Attributes tagDataSet = din.readDataset(-1, -1);	
+		String studyDateTime;
+		studyDateTime = tagDataSet.getString((int) Tag.StudyDateAndTime);
 		
-		// adding patient, series, image info to the list
-		patient = patientStudyDetails(tagDataSet);
-		patient = seriesDetails(tagDataSet);
-		patient = imageDetails(tagDataSet);
 		
-		//Adding to db
-		//DcmDAO.insertPatient(patient); 
-		// Displaying info
-		System.out.println("patient \n " + patientStudyDetails(tagDataSet));
-		System.out.println("\nstudy \n " +seriesDetails(tagDataSet));
-		System.out.println("\nimage \n " +imageDetails(tagDataSet));
+		// creating new patient, study, image obj
+		PatientStudy  ps = new PatientStudy(tagDataSet.getString(Tag.PatientID), tagDataSet.getString(Tag.PatientName), tagDataSet.getString(Tag.PatientBirthDate), tagDataSet.getString(Tag.AccessionNumber), tagDataSet.getString(Tag.StudyInstanceUID), tagDataSet.getString(Tag.StudyDescription), studyDateTime);
+		Series s = new Series(tagDataSet.getString(Tag.SeriesInstanceUID), tagDataSet.getString(Tag.StudyInstanceUID), tagDataSet.getString(Tag.SeriesNumber), tagDataSet.getString(Tag.Modality), tagDataSet.getString(Tag.SeriesDescription));
+		Image i = new Image(tagDataSet.getString(Tag.ReferenceImageNumber), tagDataSet.getString(Tag.StudyInstanceUID), tagDataSet.getString(Tag.SeriesInstanceUID), tagDataSet.getString(Tag.ImageType), tagDataSet.getString(Tag.Rows), tagDataSet.getString(Tag.Columns) , tagDataSet.getString(Tag.BitsAllocated), tagDataSet.getString(Tag.BitsStored));
+		//	Adding to db
+		//	DcmDAO.insertPatient(patient); 		
+		
+		PatientStudyDAO.insert(ps);
+		SeriesDAO.insert(s);
+		ImageDAO.insert(i);
+		// 	Displaying info	
+		System.out.println("patient \n " + ps);
+		System.out.println("\nstudy \n " + s);
+		System.out.println("\nimage \n " + i);
 
 		
 		
 	}
 	// dicom folder parser
-	public static void dcmFolderParser(File[] f) throws IOException, ClassNotFoundException, SQLException
+	public static void dcmFolderParser(File[] f) throws Exception
 	{
 		for(File file : f)
 		{
-			DicomInputStream din = new DicomInputStream(file);				
+			din = new DicomInputStream(file);				
 			Attributes tagDataSet = din.readDataset(-1, -1);	
 			
 			// adding patient, series, image info to the list
-			patient = patientStudyDetails(tagDataSet);
-			patient = seriesDetails(tagDataSet);
-			patient = imageDetails(tagDataSet);
+			PatientStudy  ps = new PatientStudy(tagDataSet.getString(Tag.PatientID), tagDataSet.getString(Tag.PatientName), tagDataSet.getString(Tag.PatientBirthDate), tagDataSet.getString(Tag.AccessionNumber), tagDataSet.getString(Tag.StudyInstanceUID), tagDataSet.getString(Tag.StudyDescription), tagDataSet.getString((int) Tag.StudyDateAndTime));
+			Series s = new Series(tagDataSet.getString(Tag.SeriesInstanceUID), tagDataSet.getString(Tag.StudyInstanceUID), tagDataSet.getString(Tag.SeriesNumber), tagDataSet.getString(Tag.Modality), tagDataSet.getString(Tag.SeriesDescription));
+			Image i = new Image(tagDataSet.getString(Tag.ReferenceImageNumber), tagDataSet.getString(Tag.StudyInstanceUID), tagDataSet.getString(Tag.SeriesInstanceUID), tagDataSet.getString(Tag.ImageType), tagDataSet.getString(Tag.Rows), tagDataSet.getString(Tag.Columns) , tagDataSet.getString(Tag.BitsAllocated), tagDataSet.getString(Tag.BitsStored));
+			
+			PatientStudyDAO.insert(ps);
+			SeriesDAO.insert(s);
+			ImageDAO.insert(i);
 			
 			// Displaying info
-			System.out.println("patient \n " + patientStudyDetails(tagDataSet));
-			System.out.println("\nstudy \n " +seriesDetails(tagDataSet));		
-			System.out.println("\nimage \n " +imageDetails(tagDataSet));		
-			System.out.println(tagDataSet.getString(Tag.SeriesNumber));
+			System.out.println("patient \n " + ps);
+			System.out.println("\nstudy \n " + s);		
+			System.out.println("\nimage \n " + i);		
+			
 		}
-	}
+	}	
 	
-	public static ArrayList<String> patientStudyDetails(Attributes patientAttrb)
-	{
-		ArrayList<String> patientDetailsList = new ArrayList<>();
-		patientDetailsList.add(patientAttrb.getString(Tag.PatientName));
-		patientDetailsList.add(patientAttrb.getString(Tag.PatientID));
-		patientDetailsList.add(patientAttrb.getString(Tag.PatientBirthDate));
-		patientDetailsList.add(patientAttrb.getString(Tag.PatientBirthDate));
-		patientDetailsList.add(patientAttrb.getString(Tag.AccessionNumber));
-		patientDetailsList.add(patientAttrb.getString(Tag.StudyInstanceUID));
-		patientDetailsList.add(patientAttrb.getString(Tag.StudyDescription));
-		patientDetailsList.add(patientAttrb.getString(Tag.StudyDate));
-		patientDetailsList.add(patientAttrb.getString(Tag.StudyTime));
-		
-		return patientDetailsList;
-	}
 	
-	public static ArrayList<String> seriesDetails(Attributes seriesAttrb)
-	{
-		ArrayList<String> seriesDetailsList = new ArrayList<>();
-		seriesDetailsList.add(seriesAttrb.getString(Tag.ClinicalTrialSeriesID));
-		seriesDetailsList.add(seriesAttrb.getString(Tag.SeriesNumber));
-		seriesDetailsList.add(seriesAttrb.getString(Tag.Modality));
-		seriesDetailsList.add(seriesAttrb.getString(Tag.SeriesDescription));
-		
-		return seriesDetailsList;
-	}
-	
-	public static ArrayList<String> imageDetails(Attributes imageAttrb)
-	{
-		ArrayList<String> imageDetailsList = new ArrayList<>();
-		
-		imageDetailsList.add(imageAttrb.getString(Tag.ReferenceImageNumber));
-		imageDetailsList.add(imageAttrb.getString(Tag.ImageType));
-		imageDetailsList.add(imageAttrb.getString(Tag.Rows));
-		imageDetailsList.add(imageAttrb.getString(Tag.Columns));
-		imageDetailsList.add(imageAttrb.getString(Tag.BitsAllocated));
-		imageDetailsList.add(imageAttrb.getString(Tag.BitsAllocated));
-		
-		
-		return imageDetailsList;
-	}
-
 	
 }
