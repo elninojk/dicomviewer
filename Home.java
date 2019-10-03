@@ -358,12 +358,12 @@ public class Home implements ActionListener, Runnable {
             	e.printStackTrace();
             }
             int limit=jpb.getMaximum();
-            System.out.println(limit);
+            //System.out.println(limit);
          // simulate some long-running process like parsing a large file
             for (int i = 1; i <= limit; i=i*5){
             	
                jpb.setValue(i);
-               System.out.println("actionPerformed sets jpb value to: "+i);
+              // System.out.println("actionPerformed sets jpb value to: "+i);
                try{Thread.sleep(1500);
                if (i >= 0 && i < 10) 
                    jpb.setString("wait for sometime"); 
