@@ -1,0 +1,70 @@
+Please add/modify the missing/changed requirements for Dicom Browser based on you final application to the below list.
+
+Requirements.
+
+1.       The application should load any data available in database to the UI during start up
+
+2.       The application should have options to import a single file to DB
+
+3.       The application should have options to load all files import a folder  to DB
+
+4.       After importing, the UI should be updated
+
+5.       The application should have an exit button
+
+6.       The columns should support sorting
+
+7.       The columns should have filters (at least for ‘Patient Study  Details’ table)
+
+8.       On clicking ‘Details’ button, the details of selected ‘Image’ should be displayed in a new window (with all possible tags)
+
+9.       The should be a footer showing application activity status
+
+10.   Import status should be displayed as progress bar
+
+11.   UI should not be blocked while performing activities
+
+12.   There shall be an option to compare the dicom files
+
+We need to display the below details in the columns
+
+Patient – Study Details
+
+-          Patient Id
+
+-          Patient Name
+
+-          Patient DOB
+
+-          Accession Number
+
+-          Study Id
+
+-          Study Description
+
+-          Study Date Time
+
+Series Details
+
+-          Series Id
+
+-          Series Number
+
+-          Modality
+
+-          Series Description
+
+Image Details
+
+-          Image Number
+
+-          Image Type
+
+-          Rows
+
+-          Columns
+
+-          Bits Allocated
+
+-          Bits Stored
+
