@@ -1,19 +1,20 @@
-package dicomviewer;
+package dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
-import javax.swing.table.DefaultTableModel;
+
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+
+import model.Image;
 
 public class ImageDAO {
-
-	private static String CREATESQL = "create table Image (imageNumber CHARACTER VARYING(150) PRIMARY KEY NOT NULL,seriesId CHARACTER VARYING(150) NOT NULL,"
+	private static String CREATESQL = "create table Image (imageNumber CHARACTER VARYING(150) ,seriesId CHARACTER VARYING(150) NOT NULL,"
 			+ "studyId CHARACTER VARYING(150) NOT NULL, imageType CHARACTER VARYING(150), rows CHARACTER VARYING(150),"
 			+ "columns CHARACTER VARYING(250)  ,bitsAllocated CHARACTER VARYING(250)  ,bitsStored CHARACTER VARYING(250) )";
 	private static String INSERTSQL = "insert into Image values(?, ?, ?, ?, ?, ?, ?, ?)";
@@ -21,7 +22,6 @@ public class ImageDAO {
 	private static String READSTUDYSQL = "select * from PatientStudy where studyId = ?";
 	private static String READSERIESSQL = "select * from Series where seriesId = ?";
 	private static String READIMAGESQL = "select * from Image where imageNumber = ?";
-	private static String FILTERSQL = "select * from Image where ? BETWEEN ? AND ?";
 
 	// OK
 	public static void create() throws Exception {
@@ -107,7 +107,42 @@ public class ImageDAO {
 	}
 
 	// OK
-	public static LinkedHashMap<String, String> details(String stdyId, String srsId, String ImgNumber)
+	public static List<Image> filter(String colName, String lowValue, String highValue) throws Exception {
+
+		PreparedStatement pStmt = null;
+		Connection con = null;
+		try {
+			con = DbConnector.getConnection();
+			pStmt = con.prepareStatement("select * from Image WHERE " + colName + "::int BETWEEN "
+					+ Integer.parseInt(lowValue) + " AND " + Integer.parseInt(highValue));
+			// pStmt.setString(1, colName);
+			// pStmt.setString(2, lowValue);
+			// pStmt.setString(3, highValue);
+			ResultSet rs = pStmt.executeQuery();
+
+			ArrayList<Image> imageList = new ArrayList<>();
+			boolean flag = false;
+			while (rs.next()) {
+				flag = true;
+				Image image = new Image(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4),
+						rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(7));
+				imageList.add(image);
+			}
+			if (!flag) {
+				throw new Exception("Image Not Found");
+			}
+			return imageList;
+		} catch (Exception ex) {
+			throw ex;
+		} finally {
+			pStmt.close();
+			con.close();
+		}
+
+	}
+
+	// OK
+	public static LinkedHashMap<String, String> details(String stdyId, String srsId, String imgNumber)
 			throws Exception {
 		Connection con = null;
 		PreparedStatement pStmt1 = null;
@@ -121,7 +156,7 @@ public class ImageDAO {
 			pStmt2 = con.prepareStatement(READSERIESSQL);
 			pStmt2.setString(1, srsId);
 			pStmt3 = con.prepareStatement(READIMAGESQL);
-			pStmt3.setString(1, ImgNumber);
+			pStmt3.setString(1, imgNumber);
 
 			LinkedHashMap<String, String> detailsTable = new LinkedHashMap<>();
 			// boolean flag = false;
@@ -181,178 +216,36 @@ public class ImageDAO {
 		}
 
 	}
+//////////////ADD TO TREE
+	public static DefaultTreeModel getImageTree(String imgNumber) throws ClassNotFoundException, SQLException {
 
-	public static DefaultTableModel compareImage(String stdyId1, String srsId1, String imgNumber1, String stdyId2,
-			String srsId2, String imgNumber2) {
-
-		DefaultTableModel compTable = new DefaultTableModel();
-
-		Connection con = null;
-		PreparedStatement pStmt1 = null;
-		PreparedStatement pStmt2 = null;
-		PreparedStatement pStmt3 = null;
-		PreparedStatement pStmt4 = null;
-		PreparedStatement pStmt5 = null;
-		PreparedStatement pStmt6 = null;
+		PreparedStatement ps1 = null;
+		DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(imgNumber, true);
+		DefaultTreeModel imageTree = new DefaultTreeModel(parentNode);
 		try {
-			con = DbConnector.getConnection();
+			Connection con = DbConnector.getConnection();
 
-			pStmt1 = con.prepareStatement(READSTUDYSQL);
-			pStmt1.setString(1, stdyId1);
-			pStmt2 = con.prepareStatement(READSERIESSQL);
-			pStmt2.setString(1, srsId1);
-			pStmt3 = con.prepareStatement(READIMAGESQL);
-			pStmt3.setString(1, imgNumber1);
-			pStmt4 = con.prepareStatement(READSTUDYSQL);
-			pStmt4.setString(1, stdyId2);
-			pStmt5 = con.prepareStatement(READSERIESSQL);
-			pStmt5.setString(1, srsId2);
-			pStmt6 = con.prepareStatement(READIMAGESQL);
-			pStmt6.setString(1, imgNumber2);
+			ps1 = con.prepareStatement(READIMAGESQL);
+			ps1.setString(1, imgNumber);
+			ResultSet rs1 = ps1.executeQuery();
+			String imageColumns[] = { "<imageNumber>", "<studyId>", "<seriesId>", "<imageType>", "<rows>", "<columns>",
+					"<bitsAllocated>", "<bitsStored>" };
+			while (rs1.next()) {
 
-			String patientStudyColumns[] = { "patientId", "patientName", "patientDOB", "accessionNumber", "studyId",
-					"studyDescription", "studyDateTime" };
-			String seriesColumns[] = { "seriesId", "studyId", "seriesNumber", "modality", "seriesDescription" };
-			String imageColumns[] = { "imageNumber", "studyId", "seriesId", "imageType", "rows", "columns",
-					"bitsAllocated", "bitsStored" };
-
-			compTable.addColumn("Value");
-			compTable.addColumn("Img1");
-			compTable.addColumn("Img2");
-
-			ResultSet rs1, rs2;
-			rs1 = pStmt1.executeQuery();
-			rs2 = pStmt4.executeQuery();
-
-			while (rs1.next() && rs2.next()) {
-
-				compTable.addRow(new Object[] { patientStudyColumns[0], rs1.getString(1), rs2.getString(1) });
-
-				compTable.addRow(new Object[] { patientStudyColumns[1], rs1.getString(2), rs2.getString(2) });
-				compTable.addRow(new Object[] { patientStudyColumns[2], rs1.getString(3), rs2.getString(3) });
-				compTable.addRow(new Object[] { patientStudyColumns[3], rs1.getString(4), rs2.getString(4) });
-				compTable.addRow(new Object[] { patientStudyColumns[4], rs1.getString(5), rs2.getString(5) });
-				compTable.addRow(new Object[] { patientStudyColumns[5], rs1.getString(6), rs2.getString(6) });
-				compTable.addRow(new Object[] { patientStudyColumns[6], rs1.getString(7), rs2.getString(7) });
+				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[0] + rs1.getString(1), false), parentNode, 0);
+				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[1] + rs1.getString(2), false), parentNode, 1);
+				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[2] + rs1.getString(3), false), parentNode, 2);
+				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[3] + rs1.getString(4), false), parentNode, 3);
+				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[4] + rs1.getString(5), false), parentNode, 4);
+				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[5] + rs1.getString(6), false), parentNode, 5);
+				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[6] + rs1.getString(7), false), parentNode, 6);
+				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[7] + rs1.getString(8), false), parentNode, 7);
 			}
-
-			rs1 = pStmt2.executeQuery();
-			rs2 = pStmt5.executeQuery();
-
-			while (rs1.next() && rs2.next()) {
-
-				compTable.addRow(new String[] { seriesColumns[0], rs1.getString(1), rs2.getString(1) });
-				// compTable.addRow(new String[] {patientStudyColumns[1], rs1.getString(2),
-				// rs2.getString(2)});
-				compTable.addRow(new String[] { seriesColumns[2], rs1.getString(3), rs2.getString(3) });
-				compTable.addRow(new String[] { seriesColumns[3], rs1.getString(4), rs2.getString(4) });
-				compTable.addRow(new String[] { seriesColumns[4], rs1.getString(5), rs2.getString(5) });
-
-			}
-
-			rs1 = pStmt3.executeQuery();
-			rs2 = pStmt6.executeQuery();
-
-			while (rs1.next() && rs2.next()) {
-
-				compTable.addRow(new String[] { imageColumns[0], rs1.getString(1), rs2.getString(1) });
-
-				compTable.addRow(new String[] { imageColumns[3], rs1.getString(4), rs2.getString(4) });
-				compTable.addRow(new String[] { imageColumns[4], rs1.getString(5), rs2.getString(5) });
-				compTable.addRow(new String[] { imageColumns[5], rs1.getString(6), rs2.getString(6) });
-				compTable.addRow(new String[] { imageColumns[6], rs1.getString(7), rs2.getString(7) });
-				compTable.addRow(new String[] { imageColumns[7], rs1.getString(8), rs2.getString(8) });
-			}
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return compTable;
-	}
-
-	public static List<Image> filter(String colName, String value) throws Exception {
-
-		PreparedStatement pStmt = null;
-		Connection con = null;
-		try {
-			con = DbConnector.getConnection();
-			pStmt = con.prepareStatement( "select * from Image WHERE " + colName +  " LIKE '%" + value + "%'");
-
-			ResultSet rs = pStmt.executeQuery();
-
-			ArrayList<Image> imageList = new ArrayList<>();
-			boolean flag = false;
-			while (rs.next()) {
-				flag = true;
-				Image image = new Image(rs.getString(1), rs.getString(2), rs.getString(3),
-						rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(7), rs.getString(8));
-				imageList.add(image);
-			}
-			if (!flag) {
-				throw new Exception("Image Not Found");
-			}
-			return imageList;
-		} catch (Exception ex) {
-			throw ex;
-		} finally {
-			pStmt.close();
-			con.close();
-		}
-		
-	}
-	
-	public static void main(String args[]) {
-		try {
-			// create();
-			// insert(new Image("i2", "s1", "p1", "3333", "5575", "hgh ghg h", "4235456435",
-			// "yegf" ));
-			//
-			// ArrayList<Image> imageList = (ArrayList<Image>)viewImageBySeries("s1", "p1");
-			// int size = imageList.size();
-			// while(size>=0) {
-			// Image img = imageList.get(--size);
-			// System.out.println(img.getBitsStored());
-			// }
-
-			// ArrayList<Image> imgList = (ArrayList<Image>)filter("rows", "23","5585");
-			// int size = imgList.size();
-			// while(size>=0) {
-			// Image img = imgList.get(--size);
-			// System.out.println(img.getRows());
-			// }
-
-			// LinkedHashMap<String, String> imgDetails = details("std1", "srs1", "img1");
-			// Set<String> keys = imgDetails.keySet();
-			// Iterator<String> itr = keys.iterator();
-			// while(itr.hasNext()) {
-			// String key = (String)itr.next();
-			//
-			// System.out.println(key + " " + imgDetails.get(key) + "\n");
-			// }
-
-//			DefaultTableModel compImg = compareImage("std1", "srs1", "img1", "std1", "srs1", "img2");
-//			System.out.println(compImg.getColumnCount());
-//			System.out.println(compImg.getRowCount());
-//
-//			// compImg.getValueAt(1, 1);
-//
-//			for (int i = 0; i < compImg.getRowCount(); ++i) {
-//				System.out.print(compImg.getValueAt(i, 0).toString());
-//				System.out.print("   " + compImg.getValueAt(i, 1).toString());
-//				System.out.print("   " + compImg.getValueAt(i, 2).toString() + "\n");
-//			}
-			
-			ArrayList<Image> stdList = (ArrayList<Image>)filter("imageNumber", "o");
-			int size = stdList.size();
-			while(size>=0) {
-				Image pst = stdList.get(--size);
-				System.out.println(pst.getImageNumber());
-			}
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			return imageTree;
+		} catch (ClassNotFoundException e) {
+			throw e;
+		} catch (SQLException e) {
+			throw e;
 		}
 	}
 }
