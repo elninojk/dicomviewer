@@ -13,6 +13,7 @@ import javax.swing.JScrollBar;
 import javax.swing.JComboBox;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import javax.swing.JList;
@@ -28,6 +29,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import dao.PatientStudyDAO;
 import model.PatientStudy;
+import dao.ImageDAO;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -79,9 +81,6 @@ public class ReaderHome extends JFrame {
 		JMenuItem mntmCompareFiles = new JMenuItem("Compare Files");
 		mnFile.add(mntmCompareFiles);
 
-		JMenuItem mntmSwitchWindow = new JMenuItem("Switch Window");
-		mnFile.add(mntmSwitchWindow);
-
 		JMenuItem mntmExit = new JMenuItem("Exit");
 		mnFile.add(mntmExit);
 
@@ -119,10 +118,26 @@ public class ReaderHome extends JFrame {
 		tabbedPane.setBorder(null);
 		tabbedPane.setBounds(0, 0, 1042, 607);
 		contentPane.add(tabbedPane);
+		
+		
+		//DEMO		
+		JPanel panelDemo = new JPanel();
+		tabbedPane.addTab("Demo", null, panelDemo, null);
+		panelDemo.setLayout(null);
+		DefaultTreeModel imageTree = null;
+		try {
+			imageTree = ImageDAO.getImageTree("i1");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		JTree tree = new JTree(imageTree);
+		tree.setBounds(0, 0, 506, 373);
+		panelDemo.add(tree);
 
-		String studyColumns[] = { "Patient Id", "Patient Name", "DOB", "Accession Number", "Study Id",
-				"Study Description", "Study Date" };
-
+		
+		
 		try {
 			List<PatientStudy> studyList = PatientStudyDAO.viewAllPatientStudy();
 			for (int i = 0; i < studyList.size(); i++) {
