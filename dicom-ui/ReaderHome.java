@@ -32,6 +32,7 @@ import model.PatientStudy;
 import dao.ImageDAO;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.JScrollPane;
 
 public class ReaderHome extends JFrame {
 
@@ -55,8 +56,9 @@ public class ReaderHome extends JFrame {
 
 	/**
 	 * Create the frame.
+	 * @throws Exception 
 	 */
-	public ReaderHome() {
+	public ReaderHome() throws Exception {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1058, 667);
 		this.setTitle("DICOM Reader");
@@ -87,22 +89,22 @@ public class ReaderHome extends JFrame {
 		JMenu mnEdit = new JMenu("Edit");
 		mnEdit.setForeground(new Color(0, 0, 0));
 		menuBar.add(mnEdit);
-		
+
 		JMenu mnCopy = new JMenu("Copy");
 		mnEdit.add(mnCopy);
-		
+
 		JMenuItem mntmText = new JMenuItem("Text");
 		mnCopy.add(mntmText);
-		
+
 		JMenuItem mntmTag = new JMenuItem("Tag");
 		mnCopy.add(mntmTag);
-		
+
 		JMenuItem mntmTagVr = new JMenuItem("Tag VR");
 		mnCopy.add(mntmTagVr);
-		
+
 		JMenuItem mntmTagName = new JMenuItem("Tag Name");
 		mnCopy.add(mntmTagName);
-		
+
 		JMenuItem mntmTagValue = new JMenuItem("Tag Value");
 		mnCopy.add(mntmTagValue);
 
@@ -118,49 +120,71 @@ public class ReaderHome extends JFrame {
 		tabbedPane.setBorder(null);
 		tabbedPane.setBounds(0, 0, 1042, 607);
 		contentPane.add(tabbedPane);
+
+		// DEMO
+//		JPanel panelDemo = new JPanel();
+//		tabbedPane.addTab("Demo", null, panelDemo, null);
+//		panelDemo.setLayout(null);
+//		DefaultTreeModel studyTree = null;
+//		try {
+//			studyTree = PatientStudyDAO.getStudyTree("std1");
+//		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//		JScrollPane scrollPane = new JScrollPane();
+//		scrollPane.setBounds(0, 0, 1037, 579);
+//		panelDemo.add(scrollPane);
+//		JTree tree = new JTree(studyTree);
+//		scrollPane.setViewportView(tree);
+
 		
 		
-		//DEMO		
-		JPanel panelDemo = new JPanel();
-		tabbedPane.addTab("Demo", null, panelDemo, null);
-		panelDemo.setLayout(null);
-		DefaultTreeModel imageTree = null;
+		
+		
+		
+		
+		
+		
+		List<PatientStudy> studyList = null;
 		try {
-			imageTree = ImageDAO.getImageTree("i1");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		JTree tree = new JTree(imageTree);
-		tree.setBounds(0, 0, 506, 373);
-		panelDemo.add(tree);
-
-		
-		
-		try {
-			List<PatientStudy> studyList = PatientStudyDAO.viewAllPatientStudy();
-			for (int i = 0; i < studyList.size(); i++) {
-				
-				String studyRow[] = { studyList.get(i).getPatientId(), studyList.get(i).getPatientName(),
-						studyList.get(i).getPatientDOB(), studyList.get(i).getAccessionNumber(),
-						studyList.get(i).getStudyId(), studyList.get(i).getStudyDescription(),
-						studyList.get(i).getStudyDateTime() };
-				
-				JPanel panel = new JPanel();
-				panel.setBorder(null);
-				tabbedPane.addTab(studyRow[1] + studyRow[5], null, panel, null);
-				tabbedPane.setEnabledAt(0, true);
-				panel.setLayout(null);
-				
-
-			}
-
+			studyList = PatientStudyDAO.viewAllPatientStudy();
 		} catch (Exception ex) {
 			javax.swing.JOptionPane.showMessageDialog(new JFrame(), "dicom files not found", "Dicom viewer", 2);
 		}
 
-		
+		for (int i = 0; i < studyList.size(); i++) {
+
+			String studyRow[] = { studyList.get(i).getPatientId(), studyList.get(i).getPatientName(),
+					studyList.get(i).getPatientDOB(), studyList.get(i).getAccessionNumber(),
+					studyList.get(i).getStudyId(), studyList.get(i).getStudyDescription(),
+					studyList.get(i).getStudyDateTime() };
+
+			JPanel panelDemo = new JPanel();
+			tabbedPane.addTab(studyRow[1], null, panelDemo, null);
+			panelDemo.setLayout(null);
+			DefaultTreeModel studyTree = null;
+			try {
+				studyTree = PatientStudyDAO.getStudyTree(studyRow[0]);
+			} catch (ClassNotFoundException e) {
+				throw e;
+			} catch (SQLException e) {
+				throw e;
+			} catch (Exception e) {
+				throw e;
+			}
+			
+			JScrollPane scrollPane = new JScrollPane();
+			scrollPane.setBounds(0, 0, 1037, 579);
+			panelDemo.add(scrollPane);
+			JTree tree = new JTree(studyTree);
+			scrollPane.setViewportView(tree);
+
+		}
 
 	}
 }
