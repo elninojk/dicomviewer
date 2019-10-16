@@ -1,30 +1,34 @@
 package model;
 
 import java.io.File;
-
 import java.util.ArrayList;
+import java.util.logging.Logger;
+
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
+
+import controller.DicomViewerController;
 import exceptions.DCMFileNotFoundExcepiton;
+
 
 public class DCMParser {
 
 	private static DicomInputStream din;
 	private static Attributes tagDataSet;
-
+	
 	// dicom file parser
 	public void dcmFileParser(File f) throws Exception {
 
 		try {
-			din = new DicomInputStream(f);
-			tagDataSet = din.readDataset(-1, -1);
-			}	
-		catch(Exception e)
-		{
+			 Logger logger = DicomViewerController.getLogger();			
+			 din = new DicomInputStream(f);
+			 tagDataSet = din.readDataset(-1, -1);
+			 System.out.println(tagDataSet.getString(Tag.PixelData));
+			 logger.info("Parsing dcm file");
+		} catch (Exception e) {
 			throw e;
 		}
-
 	}
 
 	// dicom folder parser
@@ -33,6 +37,7 @@ public class DCMParser {
 		for (File file : f) {
 			if (file.getName().endsWith(".dcm")) {
 				try {
+					 
 					flag = true;
 					// //dcmFileParser(file);
 					// } catch (PSQLException e) {
@@ -93,14 +98,11 @@ public class DCMParser {
 		String stime = tagDataSet.getString(Tag.StudyTime);
 		StringBuffer studyDate = splitDate(sdate);
 		StringBuffer studyTime = splitTime(stime);
-		patientStudyList.add(String.valueOf(studyDate.append(" " + studyTime)));
-	
-
+		patientStudyList.add(String.valueOf(studyDate.append(" " + studyTime)));		
 		return patientStudyList;
 	}
-	
-	public ArrayList<String> getSeriesList()
-	{
+
+	public ArrayList<String> getSeriesList()  {
 		ArrayList<String> seriesList = new ArrayList<>();
 		seriesList.add(tagDataSet.getString(Tag.SeriesInstanceUID));
 		seriesList.add(tagDataSet.getString(Tag.StudyInstanceUID));
@@ -108,11 +110,11 @@ public class DCMParser {
 		seriesList.add(tagDataSet.getString(Tag.Modality));
 		seriesList.add(tagDataSet.getString(Tag.SeriesDescription));
 		
+		
 		return seriesList;
 	}
-	
-	public ArrayList<String> getImageList()
-	{
+
+	public ArrayList<String> getImageList()  {
 		ArrayList<String> imageList = new ArrayList<>();
 		imageList.add(tagDataSet.getString(Tag.SOPInstanceUID));
 		imageList.add(tagDataSet.getString(Tag.StudyInstanceUID));
@@ -122,10 +124,10 @@ public class DCMParser {
 		imageList.add(tagDataSet.getString(Tag.Columns));
 		imageList.add(tagDataSet.getString(Tag.BitsAllocated));
 		imageList.add(tagDataSet.getString(Tag.BitsStored));
+		
 		return imageList;
 	}
-	
-		
+
 	// public static void main(String args[]) throws Exception
 	// {
 	// dcmFileParser(new
