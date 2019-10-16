@@ -169,7 +169,7 @@ public class ReaderHome extends JFrame {
 			panelDemo.setLayout(null);
 			DefaultTreeModel studyTree = null;
 			try {
-				studyTree = PatientStudyDAO.getStudyTree(studyRow[0]);
+				studyTree = PatientStudyDAO.getStudyTree(studyRow[4]);
 			} catch (ClassNotFoundException e) {
 				throw e;
 			} catch (SQLException e) {
