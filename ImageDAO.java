@@ -21,7 +21,7 @@ public class ImageDAO {
 	private static String READBYSERIESSQL = "select * from Image where (seriesId = ? AND studyId = ?)";
 	private static String READSTUDYSQL = "select * from PatientStudy where studyId = ?";
 	private static String READSERIESSQL = "select * from Series where seriesId = ?";
-	private static String READIMAGESQL = "select * from Image where imageNumber = ?";
+	private static String READROWSQL = "select * from Image where studyId= ? and seriesId = ? and imageNumber = ?";
 
 	// OK
 	public static void create() throws Exception {
@@ -155,7 +155,7 @@ public class ImageDAO {
 			pStmt1.setString(1, stdyId);
 			pStmt2 = con.prepareStatement(READSERIESSQL);
 			pStmt2.setString(1, srsId);
-			pStmt3 = con.prepareStatement(READIMAGESQL);
+			pStmt3 = con.prepareStatement(READROWSQL);
 			pStmt3.setString(1, imgNumber);
 
 			LinkedHashMap<String, String> detailsTable = new LinkedHashMap<>();
@@ -217,31 +217,34 @@ public class ImageDAO {
 
 	}
 //////////////ADD TO TREE
-	public static DefaultTreeModel getImageTree(String imgNumber) throws ClassNotFoundException, SQLException {
+	public static DefaultTreeModel getImageTree(DefaultTreeModel studyTree, DefaultMutableTreeNode grandParent, String studyId, String seriesId, String imgNumber) throws Exception {
 
 		PreparedStatement ps1 = null;
+		int index = studyTree.getChildCount(grandParent);
 		DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(imgNumber, true);
-		DefaultTreeModel imageTree = new DefaultTreeModel(parentNode);
+		studyTree.insertNodeInto(parentNode, grandParent, index);
 		try {
 			Connection con = DbConnector.getConnection();
 
-			ps1 = con.prepareStatement(READIMAGESQL);
-			ps1.setString(1, imgNumber);
+			ps1 = con.prepareStatement(READROWSQL);
+			ps1.setString(1, studyId);
+			ps1.setString(2, seriesId);
+			ps1.setString(3, imgNumber);
 			ResultSet rs1 = ps1.executeQuery();
 			String imageColumns[] = { "<imageNumber>", "<studyId>", "<seriesId>", "<imageType>", "<rows>", "<columns>",
 					"<bitsAllocated>", "<bitsStored>" };
 			while (rs1.next()) {
 
-				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[0] + rs1.getString(1), false), parentNode, 0);
-				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[1] + rs1.getString(2), false), parentNode, 1);
-				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[2] + rs1.getString(3), false), parentNode, 2);
-				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[3] + rs1.getString(4), false), parentNode, 3);
-				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[4] + rs1.getString(5), false), parentNode, 4);
-				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[5] + rs1.getString(6), false), parentNode, 5);
-				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[6] + rs1.getString(7), false), parentNode, 6);
-				imageTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[7] + rs1.getString(8), false), parentNode, 7);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[0] + rs1.getString(1), false), parentNode, 0);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[1] + rs1.getString(2), false), parentNode, 1);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[2] + rs1.getString(3), false), parentNode, 2);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[3] + rs1.getString(4), false), parentNode, 3);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[4] + rs1.getString(5), false), parentNode, 4);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[5] + rs1.getString(6), false), parentNode, 5);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[6] + rs1.getString(7), false), parentNode, 6);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[7] + rs1.getString(8), false), parentNode, 7);
 			}
-			return imageTree;
+			return studyTree;
 		} catch (ClassNotFoundException e) {
 			throw e;
 		} catch (SQLException e) {

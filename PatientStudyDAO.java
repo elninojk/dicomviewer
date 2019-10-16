@@ -1,21 +1,28 @@
-package dicomviewer;
+package dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-public class PatientStudyDAO {
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
+
+import model.Image;
+import model.PatientStudy;
+import model.Series;
+
+public class PatientStudyDAO {
 	private static String CREATESQL = "create table PatientStudy (patientId CHARACTER VARYING(150) NOT NULL, patientName CHARACTER VARYING(150) , "
 			+ "patientDOB CHARACTER VARYING(150) , accessionNumber CHARACTER VARYING(150) ,"
 			+ "studyId CHARACTER VARYING(150) PRIMARY KEY NOT NULL, studyDescription CHARACTER VARYING(250) , studyDateTime CHARACTER VARYING(150) )";
 	private static String INSERTSQL = "insert into PatientStudy values(?, ? , ?, ?, ?, ?, ?)";
 	private static String SORTSQL = "select * from patientStudy ORDER BY ?";
-	private static String FILTERSQL = "select * from patientStudy WHERE cast(patientdob as int) BETWEEN ? AND ?";
 	private static String READALLSQL = "select * from PatientStudy";
+	private static String READROWSQL = "select * from PatientStudy where studyId = ?";
 
 //	OK
 	public static void create() throws Exception {
@@ -41,7 +48,7 @@ public class PatientStudyDAO {
 		PreparedStatement pStmt = null;
 		try {
 			con = DbConnector.getConnection();
-
+			
 			pStmt = con.prepareStatement(INSERTSQL);
 			pStmt.setString(1, pStudy.getPatientId());
 			pStmt.setString(2, pStudy.getPatientName());
@@ -125,14 +132,17 @@ public class PatientStudyDAO {
 		}
 	}
 
-	public static List<PatientStudy> filter(String colName, String value) throws Exception {
+	public static List<PatientStudy> filter(String colName, String lowValue, String highValue) throws Exception {
 
 		PreparedStatement pStmt = null;
 		Connection con = null;
 		try {
 			con = DbConnector.getConnection();
-			pStmt = con.prepareStatement( "select * from PatientStudy WHERE " + colName +  " LIKE '%" + value + "%'");
+			pStmt = con.prepareStatement( "select * from patientStudy WHERE " + colName +  "::int BETWEEN " + Integer.parseInt(lowValue) + " AND " + Integer.parseInt(highValue));
 
+			//pStmt.setString(1, colName);
+//			pStmt.setInt(2, Integer.parseInt(lowValue));
+//			pStmt.setInt(3, Integer.parseInt(highValue));
 			ResultSet rs = pStmt.executeQuery();
 
 			ArrayList<PatientStudy> pStudyList = new ArrayList<>();
@@ -156,28 +166,47 @@ public class PatientStudyDAO {
 		
 	}
 
-	
-	public static void main(String args[]) {
-		try {
-//			create();
-//			insert(new PatientStudy("p2", "wan", "23344555", "3333", "5575", "hgh ghg h", "4235456435" ));
+	public static DefaultTreeModel getStudyTree(String studyId) throws Exception {             //////////ADDTOTREE
 
-//			ArrayList<PatientStudy> stdList = (ArrayList<PatientStudy>)filterIntegers("accessionnumber", "23","5555");
-//			int size = stdList.size();
-//			while(size>=0) {
-//				PatientStudy pst = stdList.get(--size);
-//				System.out.println(pst.getAccessionNumber());
-//			}
+		PreparedStatement ps1 = null;
+		DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(studyId, true);
+		DefaultTreeModel studyTree = new DefaultTreeModel(parentNode);
+		try {
+			Connection con = DbConnector.getConnection();
+
+			ps1 = con.prepareStatement(READROWSQL);
+			ps1.setString(1, studyId);
+			ResultSet rs1 = ps1.executeQuery();
+			String patientStudyColoumns[] = { "patientId", "patientName", "patientDOB", "accessionNumber", "studyId",
+					"studyDescription", "studyDateTime" };
 			
-//			ArrayList<PatientStudy> stdList = (ArrayList<PatientStudy>)filter("accessionnumber", "7");
-//			int size = stdList.size();
-//			while(size>=0) {
-//				PatientStudy pst = stdList.get(--size);
-//				System.out.println(pst.getAccessionNumber());
-//			}
+			while (rs1.next()) {
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(patientStudyColoumns[0] + rs1.getString(1), false), parentNode, 0);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(patientStudyColoumns[1] + rs1.getString(2), false), parentNode, 1);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(patientStudyColoumns[2] + rs1.getString(3), false), parentNode, 2);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(patientStudyColoumns[3] + rs1.getString(4), false), parentNode, 3);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(patientStudyColoumns[4] + rs1.getString(5), false), parentNode, 4);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(patientStudyColoumns[5] + rs1.getString(6), false), parentNode, 5);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(patientStudyColoumns[6] + rs1.getString(7), false), parentNode, 6);
+			}
+			List<Series> seriesList = null;
+			try {
+				seriesList = SeriesDAO.viewSeriesByStudy(studyId);             //
+			} catch (Exception e) {
+				throw e;
+			}
+			ArrayList<String> seriesIdList = null;
+			for(int i=0; i<seriesList.size(); ++i) {
+				Series srs = seriesList.get(i);
+				DefaultTreeModel srsTree = SeriesDAO.getSeriesTree(studyTree, parentNode, studyId, srs.getSeriesId());
+//				studyTree.insertNodeInto(srsTree.root, parentNode, 7+i);                            //////////////ADD TO TREEEE
+			}
 			
-		} catch (Exception ex) {
-			ex.printStackTrace();
+			return studyTree;
+		} catch (ClassNotFoundException e) {
+			throw e;
+		} catch (SQLException e) {
+			throw e;
 		}
 	}
 }

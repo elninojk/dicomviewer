@@ -128,11 +128,12 @@ public class SeriesDAO {
 
 	}
 
-	public static DefaultTreeModel getSeriesTree(String studyId, String seriesId) throws Exception {             //////////ADDTOTREE
+	public static DefaultTreeModel getSeriesTree(DefaultTreeModel studyTree, DefaultMutableTreeNode grandParent, String studyId, String seriesId) throws Exception {             //////////ADDTOTREE
 
 		PreparedStatement ps1 = null;
+		int index = grandParent.getChildCount();
 		DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(seriesId, true);
-		DefaultTreeModel seriesTree = new DefaultTreeModel(parentNode);
+		studyTree.insertNodeInto(parentNode, grandParent, index);
 		try {
 			Connection con = DbConnector.getConnection();
 
@@ -142,13 +143,13 @@ public class SeriesDAO {
 			String seriesColumns[] = { "<seriesId>", "<studyId>", "<seriesNumber>", "<modality>", "<seriesDescription>"};
 			
 			while (rs1.next()) {
-				seriesTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[0] + rs1.getString(1), false), parentNode, 0);
-				seriesTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[1] + rs1.getString(2), false), parentNode, 1);
-				seriesTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[2] + rs1.getString(3), false), parentNode, 2);
-				seriesTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[3] + rs1.getString(4), false), parentNode, 3);
-				seriesTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[4] + rs1.getString(5), false), parentNode, 4);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[0] + rs1.getString(1), false), parentNode, 0);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[1] + rs1.getString(2), false), parentNode, 1);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[2] + rs1.getString(3), false), parentNode, 2);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[3] + rs1.getString(4), false), parentNode, 3);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(seriesColumns[4] + rs1.getString(5), false), parentNode, 4);
 			}
-			List imageList = null;
+			List<Image> imageList = null;
 			try {
 				imageList = ImageDAO.viewImageBySeries(studyId, seriesId);
 			} catch (Exception e) {
@@ -156,12 +157,12 @@ public class SeriesDAO {
 			}
 			ArrayList<String> imgNumberList = null;
 			for(int i=0; i<imageList.size(); ++i) {
-				Image img = (Image) imageList.get(i);
-				DefaultTreeModel imgTree = ImageDAO.getImageTree(img.getImageNumber());
-				seriesTree.insertNodeInto(imgTree.root, parentNode, 5+i);                            //////////////ADD TO TREEEE
+				Image img = imageList.get(i);
+				studyTree = ImageDAO.getImageTree(studyTree, parentNode, studyId, seriesId, img.getImageNumber());
+				                            //////////////ADD TO TREEEE
 			}
 			
-			return seriesTree;
+			return studyTree;
 		} catch (ClassNotFoundException e) {
 			throw e;
 		} catch (SQLException e) {
