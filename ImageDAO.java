@@ -23,7 +23,7 @@ public class ImageDAO {
 	private static String READSERIESSQL = "select * from Series where seriesId = ?";
 	private static String READROWSQL = "select * from Image where studyId= ? and seriesId = ? and imageNumber = ?";
 
-	// OK
+
 	public static void create() throws Exception {
 		Connection con = null;
 		PreparedStatement pStmt = null;
@@ -41,7 +41,6 @@ public class ImageDAO {
 
 	}
 
-	// OK
 	public static void insert(Image image) throws Exception {
 
 		Connection con = null;
@@ -53,7 +52,7 @@ public class ImageDAO {
 			pStmt.setString(1, image.getImageNumber());
 			pStmt.setString(2, image.getSeriesId());
 			pStmt.setString(3, image.getStudyId());
-			pStmt.setString(4, image.getImageType()); /// POSSIBLE EXCEPTION//UTIL DATE
+			pStmt.setString(4, image.getImageType()); 
 			pStmt.setString(5, image.getRows());
 			pStmt.setString(6, image.getColumns());
 			pStmt.setString(7, image.getBitsAllocated());
@@ -72,7 +71,6 @@ public class ImageDAO {
 		}
 	}
 
-	// OK
 	public static List<Image> viewImageBySeries(String studyId, String seriesId) throws Exception {
 
 		Connection con = null;
@@ -106,7 +104,6 @@ public class ImageDAO {
 		}
 	}
 
-	// OK
 	public static List<Image> filter(String colName, String lowValue, String highValue) throws Exception {
 
 		PreparedStatement pStmt = null;
@@ -115,9 +112,6 @@ public class ImageDAO {
 			con = DbConnector.getConnection();
 			pStmt = con.prepareStatement("select * from Image WHERE " + colName + "::int BETWEEN "
 					+ Integer.parseInt(lowValue) + " AND " + Integer.parseInt(highValue));
-			// pStmt.setString(1, colName);
-			// pStmt.setString(2, lowValue);
-			// pStmt.setString(3, highValue);
 			ResultSet rs = pStmt.executeQuery();
 
 			ArrayList<Image> imageList = new ArrayList<>();
@@ -141,7 +135,6 @@ public class ImageDAO {
 
 	}
 
-	// OK
 	public static LinkedHashMap<String, String> details(String stdyId, String srsId, String imgNumber)
 			throws Exception {
 		Connection con = null;
@@ -159,13 +152,10 @@ public class ImageDAO {
 			pStmt3.setString(1, imgNumber);
 
 			LinkedHashMap<String, String> detailsTable = new LinkedHashMap<>();
-			// boolean flag = false;
-
 			String patientStudyColumns[] = { "patientId", "patientName", "patientDOB", "accessionNumber", "studyId",
 					"studyDescription", "studyDateTime" };
 			ResultSet rs1 = pStmt1.executeQuery();
 			while (rs1.next()) {
-				// flag = true;
 				detailsTable.put(patientStudyColumns[0], rs1.getString(1));
 				detailsTable.put(patientStudyColumns[1], rs1.getString(2));
 				detailsTable.put(patientStudyColumns[2], rs1.getString(3));
@@ -200,10 +190,6 @@ public class ImageDAO {
 				detailsTable.put(imageColumns[7], rs3.getString(8));
 
 			}
-
-			// if (!flag) {
-			// throw new Exception("Image Not Found !!!");
-			// }
 			return detailsTable;
 		} catch (Exception ex) {
 			throw ex;
@@ -216,7 +202,7 @@ public class ImageDAO {
 		}
 
 	}
-//////////////ADD TO TREE
+
 	public static DefaultTreeModel getImageTree(DefaultTreeModel studyTree, DefaultMutableTreeNode grandParent, String studyId, String seriesId, String imgNumber) throws Exception {
 
 		PreparedStatement ps1 = null;
@@ -231,18 +217,18 @@ public class ImageDAO {
 			ps1.setString(2, seriesId);
 			ps1.setString(3, imgNumber);
 			ResultSet rs1 = ps1.executeQuery();
-			String imageColumns[] = { "<imageNumber>", "<studyId>", "<seriesId>", "<imageType>", "<rows>", "<columns>",
-					"<bitsAllocated>", "<bitsStored>" };
+			String imageColumns[] = { "(0008,0018) [UI] <SOP Instance UID>", "(0020,0010) [SH] <studyId>", "(0020,000E)[UI] <seriesId>", "(0008,0008) [CS] <imageType>",
+					"(0028,0010)[US] <rows>", "(0028,0011) [US] <columns>",	"(0028,0100)[US] <bitsAllocated>", "(0028,0101) [US] <bitsStored>" };
 			while (rs1.next()) {
 
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[0] + rs1.getString(1), false), parentNode, 0);
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[1] + rs1.getString(2), false), parentNode, 1);
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[2] + rs1.getString(3), false), parentNode, 2);
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[3] + rs1.getString(4), false), parentNode, 3);
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[4] + rs1.getString(5), false), parentNode, 4);
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[5] + rs1.getString(6), false), parentNode, 5);
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[6] + rs1.getString(7), false), parentNode, 6);
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[7] + rs1.getString(8), false), parentNode, 7);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[0] + "[" + rs1.getString(1) + "]", false), parentNode, 0);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[1] + "[" + rs1.getString(2) + "]", false), parentNode, 1);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[2] + "[" + rs1.getString(3) + "]", false), parentNode, 2);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[3] + "[" + rs1.getString(4) + "]", false), parentNode, 3);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[4] + "[" + rs1.getString(5) + "]", false), parentNode, 4);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[5] + "[" + rs1.getString(6) + "]", false), parentNode, 5);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[6] + "[" + rs1.getString(7) + "]", false), parentNode, 6);
+				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[7] + "[" + rs1.getString(8) + "]", false), parentNode, 7);
 			}
 			return studyTree;
 		} catch (ClassNotFoundException e) {
