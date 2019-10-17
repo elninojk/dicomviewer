@@ -222,8 +222,8 @@ public class ImageDAO {
 			while (rs1.next()) {
 
 				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[0] + "[" + rs1.getString(1) + "]", false), parentNode, 0);
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[1] + "[" + rs1.getString(2) + "]", false), parentNode, 1);
-				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[2] + "[" + rs1.getString(3) + "]", false), parentNode, 2);
+//				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[1] + "[" + rs1.getString(2) + "]", false), parentNode, 1);
+//				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[2] + "[" + rs1.getString(3) + "]", false), parentNode, 2);
 				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[3] + "[" + rs1.getString(4) + "]", false), parentNode, 3);
 				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[4] + "[" + rs1.getString(5) + "]", false), parentNode, 4);
 				studyTree.insertNodeInto(new DefaultMutableTreeNode(imageColumns[5] + "[" + rs1.getString(6) + "]", false), parentNode, 5);
