@@ -165,7 +165,7 @@ public class ReaderHome extends JFrame {
 					studyList.get(i).getStudyDateTime() };
 
 			JPanel panelDemo = new JPanel();
-			tabbedPane.addTab(studyRow[1], null, panelDemo, null);
+			tabbedPane.addTab(studyRow[1] + "_" + studyRow[5], null, panelDemo, null);
 			panelDemo.setLayout(null);
 			DefaultTreeModel studyTree = null;
 			try {
