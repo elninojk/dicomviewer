@@ -20,7 +20,7 @@ public class ImageDAO {
 	private static String INSERTSQL = "insert into Image values(?, ?, ?, ?, ?, ?, ?, ?)";
 	private static String READBYSERIESSQL = "select * from Image where (seriesId = ? AND studyId = ?)";
 	private static String READSTUDYSQL = "select * from PatientStudy where studyId = ?";
-	private static String READSERIESSQL = "select * from Series where studyId = ? and seriesId = ?";
+	private static String READSERIESSQL = "select * from Series where studyId= ? and seriesId = ?";
 	private static String READROWSQL = "select * from Image where studyId= ? and seriesId = ? and imageNumber = ?";
 
 
