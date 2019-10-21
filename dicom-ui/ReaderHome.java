@@ -3,10 +3,15 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JToolBar;
 import javax.swing.JScrollBar;
@@ -26,6 +31,8 @@ import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
 import javax.swing.JTabbedPane;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import dao.PatientStudyDAO;
 import model.PatientStudy;
@@ -33,10 +40,13 @@ import dao.ImageDAO;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
 
 public class ReaderHome extends JFrame {
 
 	private JPanel contentPane;
+	private JTextField jTextField;
 
 	/**
 	 * Launch the application.
@@ -56,11 +66,12 @@ public class ReaderHome extends JFrame {
 
 	/**
 	 * Create the frame.
-	 * @throws Exception 
+	 * 
+	 * @throws Exception
 	 */
 	public ReaderHome() throws Exception {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1058, 667);
+		setBounds(100, 100, 1058, 675);
 		this.setTitle("DICOM Reader");
 
 		JMenuBar menuBar = new JMenuBar();
@@ -117,39 +128,31 @@ public class ReaderHome extends JFrame {
 		contentPane.setLayout(null);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBounds(0, 0, 1042, 568);
 		tabbedPane.setBorder(null);
-		tabbedPane.setBounds(0, 0, 1042, 607);
 		contentPane.add(tabbedPane);
 
 		// DEMO
-//		JPanel panelDemo = new JPanel();
-//		tabbedPane.addTab("Demo", null, panelDemo, null);
-//		panelDemo.setLayout(null);
-//		DefaultTreeModel studyTree = null;
-//		try {
-//			studyTree = PatientStudyDAO.getStudyTree("std1");
-//		} catch (ClassNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		
-//		JScrollPane scrollPane = new JScrollPane();
-//		scrollPane.setBounds(0, 0, 1037, 579);
-//		panelDemo.add(scrollPane);
-//		JTree tree = new JTree(studyTree);
-//		scrollPane.setViewportView(tree);
+		// JPanel panelDemo = new JPanel();
+		// tabbedPane.addTab("Demo", null, panelDemo, null);
+		// panelDemo.setLayout(null);
+		// DefaultTreeModel studyTree = null;
+		// try {
+		// studyTree = PatientStudyDAO.getStudyTree("std1");
+		// } catch (ClassNotFoundException e) {
+		// e.printStackTrace();
+		// } catch (SQLException e) {
+		// e.printStackTrace();
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		//
+		// JScrollPane scrollPane = new JScrollPane();
+		// scrollPane.setBounds(0, 0, 1037, 579);
+		// panelDemo.add(scrollPane);
+		// JTree tree = new JTree(studyTree);
+		// scrollPane.setViewportView(tree);
 
-		
-		
-		
-		
-		
-		
-		
-		
 		List<PatientStudy> studyList = null;
 		try {
 			studyList = PatientStudyDAO.viewAllPatientStudy();
@@ -165,7 +168,7 @@ public class ReaderHome extends JFrame {
 					studyList.get(i).getStudyDateTime() };
 
 			JPanel panelDemo = new JPanel();
-			tabbedPane.addTab(studyRow[1] + "_" + studyRow[5], null, panelDemo, null);
+			tabbedPane.addTab(studyRow[1], null, panelDemo, null);
 			panelDemo.setLayout(null);
 			DefaultTreeModel studyTree = null;
 			try {
@@ -177,12 +180,58 @@ public class ReaderHome extends JFrame {
 			} catch (Exception e) {
 				throw e;
 			}
-			
+
 			JScrollPane scrollPane = new JScrollPane();
 			scrollPane.setBounds(0, 0, 1037, 579);
 			panelDemo.add(scrollPane);
 			JTree tree = new JTree(studyTree);
 			scrollPane.setViewportView(tree);
+
+			JLabel selectedLabel = new JLabel("");
+			selectedLabel.setBounds(448, 574, 241, 30);
+			contentPane.add(selectedLabel);
+
+			tree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+
+				public void valueChanged(TreeSelectionEvent e) {
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+					StringSelection stringSelection = new StringSelection(selectedNode.getUserObject().toString());
+					mntmText.addActionListener(new ActionListener() { // TEXT
+						public void actionPerformed(ActionEvent ev) {
+
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, null);
+
+						}
+					});
+					mntmTagName.addActionListener(new ActionListener() { //TAG NAME
+						public void actionPerformed(ActionEvent ev) {
+
+							String str = selectedNode.toString();
+							String tagName = str.substring(str.indexOf("<") + 1, str.indexOf(">"));
+							StringSelection stringSelection = new StringSelection(tagName);
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, null);
+
+						}
+					});
+					mntmTagValue.addActionListener(new ActionListener() { //TAG VALUE
+						public void actionPerformed(ActionEvent ev) {
+
+							String str = selectedNode.toString();
+							String[] tagName = str.split(">");
+							for (int i = 0; i < tagName.length; i++) {
+
+								StringSelection stringSelection = new StringSelection(tagName[i]);
+								Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+								clipboard.setContents(stringSelection, null);
+							}
+
+						}
+					});
+
+				}
+			});
 
 		}
 
