@@ -1,0 +1,68 @@
+17::model.DCMObjFactory::createDCMObj::Fri Oct 18 13:58:46 IST 2019::Patient : logged successfully
+17::model.DCMObjFactory::createDCMObj::Fri Oct 18 13:58:46 IST 2019::Series : logged successfully
+17::model.DCMObjFactory::createDCMObj::Fri Oct 18 13:58:46 IST 2019::Image : logged successfully
+17::model.DCMObjFactory::createDCMObj::Fri Oct 18 13:58:46 IST 2019::DicomViewerController : logged successfully
+17::controller.DicomViewerController::insertImage::Fri Oct 18 13:58:47 IST 2019::Image : inserted successfully
+17::controller.DicomViewerController::viewAllPatientStudy::Fri Oct 18 13:58:47 IST 2019::Patient study : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:58:47 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:58:47 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:58:48 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:58:48 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:58:48 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:59:27 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:59:27 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:59:27 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:59:27 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:59:28 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:59:28 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:59:29 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:59:29 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:59:30 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:59:30 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:59:30 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:59:30 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:59:31 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:59:31 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 13:59:31 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 13:59:31 IST 2019::Image : retrieval
+17::model.DCMParser::dcmFileParser::Fri Oct 18 13:59:59 IST 2019::Parsing dcm file
+17::model.DCMObjFactory::createDCMObj::Fri Oct 18 13:59:59 IST 2019::Patient : logged successfully
+17::model.DCMObjFactory::createDCMObj::Fri Oct 18 13:59:59 IST 2019::Series : logged successfully
+17::model.DCMObjFactory::createDCMObj::Fri Oct 18 13:59:59 IST 2019::Image : logged successfully
+17::model.DCMObjFactory::createDCMObj::Fri Oct 18 13:59:59 IST 2019::DicomViewerController : logged successfully
+17::controller.DicomViewerController::insertImage::Fri Oct 18 13:59:59 IST 2019::Image : inserted successfully
+17::controller.DicomViewerController::viewAllPatientStudy::Fri Oct 18 14:00:00 IST 2019::Patient study : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:00 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:00 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:00 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:01 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:01 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:07 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:07 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:07 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:07 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:10 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:10 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:10 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:11 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:11 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:11 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:12 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:12 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:12 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:12 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:13 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:13 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:15 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:15 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:16 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:16 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:17 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:17 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:00:18 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:00:18 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:01:14 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:01:14 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewSeries::Fri Oct 18 14:01:15 IST 2019::Series : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:01:15 IST 2019::Image : retrieval
+17::controller.DicomViewerController::viewImage::Fri Oct 18 14:01:15 IST 2019::Image : retrieval
