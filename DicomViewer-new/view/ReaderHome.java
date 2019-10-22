@@ -1,25 +1,15 @@
 package view;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JToolBar;
-import javax.swing.JScrollBar;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.awt.event.ActionEvent;
-import javax.swing.JList;
 import java.awt.Color;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -27,16 +17,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.JTree;
-import javax.swing.ListSelectionModel;
 import javax.swing.JTabbedPane;
 import javax.swing.tree.DefaultTreeModel;
 
 import controller.DicomViewerController;
-import dao.PatientStudyDAO;
 import model.DCMParser;
-import model.PatientStudy;
-import dao.ImageDAO;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
@@ -87,7 +72,7 @@ public class ReaderHome extends JFrame {
 		mntmOpenFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
-				int returnValue = fileChooser.showOpenDialog(null);
+				fileChooser.showOpenDialog(null);
 				File dicomFile = fileChooser.getSelectedFile();
 				try {
 					display(dicomFile);
