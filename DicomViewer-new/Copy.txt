@@ -1,0 +1,65 @@
+			tree.setShowsRootHandles(true);
+			tree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+
+				public void valueChanged(TreeSelectionEvent e) {
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+					StringSelection stringSelection = new StringSelection(selectedNode.getUserObject().toString());
+					mntmText.addActionListener(new ActionListener() { // TEXT
+						public void actionPerformed(ActionEvent ev) {
+
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, null);
+
+						}
+					});
+					mntmTagName.addActionListener(new ActionListener() { // TAG NAME
+						public void actionPerformed(ActionEvent ev) {
+
+							String str = selectedNode.toString();
+							String tagName = str.substring(str.indexOf("<") + 1, str.indexOf(">"));
+							StringSelection stringSelection = new StringSelection(tagName);
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, null);
+
+						}
+					});
+					mntmTagValue.addActionListener(new ActionListener() { // TAG VALUE
+						public void actionPerformed(ActionEvent ev) {
+
+							String str = selectedNode.toString();
+							String[] tagName = str.split(">");
+							for (int i = 0; i < tagName.length; i++) {
+
+								StringSelection stringSelection = new StringSelection(tagName[i]);
+								Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+								clipboard.setContents(stringSelection, null);
+							}
+
+						}
+					});
+					mntmTag.addActionListener(new ActionListener() { // TAG 
+						public void actionPerformed(ActionEvent ev) {
+
+							String str = selectedNode.toString();
+							String tag = str.substring(str.indexOf("(") + 1, str.indexOf(")"));
+							StringSelection stringSelection = new StringSelection(tag);
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, null);
+
+						}
+					});
+					mntmTagVr.addActionListener(new ActionListener() { // TAG VR
+						public void actionPerformed(ActionEvent ev) {
+
+							String str = selectedNode.toString();
+							String tagVR = str.substring(str.indexOf("[") + 1, str.indexOf("]"));
+							StringSelection stringSelection = new StringSelection(tagVR);
+							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							clipboard.setContents(stringSelection, null);
+
+						}
+					});
+				}
+			});
+		}
+	
