@@ -1,7 +1,7 @@
 package view;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -11,6 +11,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
+import java.awt.Desktop;
+
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -31,6 +33,12 @@ import java.awt.event.InputEvent;
 public class ReaderHome extends JFrame {
 
 	private JPanel contentPane;
+
+	public JTabbedPane getTabbedPane() {
+		return tabbedPane;
+	}
+
+	protected JTabbedPane tabbedPane;
 	static ReaderHome frame = null;
 
 	/**
@@ -72,18 +80,38 @@ public class ReaderHome extends JFrame {
 		mntmOpenFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
-				fileChooser.showOpenDialog(null);
+				int returnValue = fileChooser.showOpenDialog(null);
 				File dicomFile = fileChooser.getSelectedFile();
 				try {
 					display(dicomFile);
+				} catch (NullPointerException e1) {
+
 				} catch (Exception e1) {
-					JOptionPane.showMessageDialog(null, e1.getMessage(), "Error!!!" , JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null, e1.getMessage(), "Error!!!", JOptionPane.INFORMATION_MESSAGE);
+					e1.printStackTrace();
 				}
 			}
-		}) ;
+		});
 		mnFile.add(mntmOpenFile);
 
 		JMenuItem mntmConvertToTextFile = new JMenuItem("Convert To Text File");
+		mntmConvertToTextFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				JFileChooser fileChooser = new JFileChooser();
+				int returnValue = fileChooser.showOpenDialog(null);
+				File dicomFile = fileChooser.getSelectedFile();
+				try {
+					File textFile = ConvertToText.convertToText(dicomFile);
+					Desktop.getDesktop().open(textFile);
+				} catch (NullPointerException e1) {
+
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(null, e1.getMessage(), "Error!!!", JOptionPane.INFORMATION_MESSAGE);
+					e1.printStackTrace();
+				}
+			}
+		});
 		mntmConvertToTextFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_MASK));
 		mnFile.add(mntmConvertToTextFile);
 
@@ -104,8 +132,8 @@ public class ReaderHome extends JFrame {
 		mntmExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, InputEvent.ALT_MASK));
 		mntmExit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-					System.out.print("Exiting...");
-					frame.dispose();
+				System.out.print("Exiting...");
+				frame.dispose();
 			}
 		});
 		mnFile.add(mntmExit);
@@ -141,17 +169,16 @@ public class ReaderHome extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
-	}
-
-	public void display(File dicomFile) throws Exception {
-
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBorder(null);
 		tabbedPane.setBounds(0, 0, 1042, 607);
 		contentPane.add(tabbedPane);
 
-		//////////////
+	}
 
+	public void display(File dicomFile) throws Exception {
+
+		////////////////////////////////
 		DicomViewerController controllerObj = new DicomViewerController(new DCMParser());
 		controllerObj.parseDCMFile(dicomFile);
 		ArrayList<String> patientStudyTags = controllerObj.getPatientStudyTags();
@@ -161,29 +188,28 @@ public class ReaderHome extends JFrame {
 		DefaultMutableTreeNode root = new DefaultMutableTreeNode(patientStudyTags.get(5), true);
 		DefaultTreeModel studyTree = new DefaultTreeModel(root);
 
-		String patientStudyColoumns[] = { "(0010,0020) [LO] <patientId>", "(0010,0010) [PN] <patientName>",
-				"(0010,0030) [DA] <patientDOB>", "(0008,0050) [SH] <accessionNumber>", "(0020,0010) [SH] <studyId>",
-				"(0008,1030) [LO] <studyDescription>", "(0032,0032) [DA] <studyDateTime>" };
-		String seriesColumns[] = { "(0020,000E) [UI] <seriesId>", "(0020,0010) [SH] <studyId>",
-				"(0020,0011) [IS] <seriesNumber>", "(0008,0060) [CS] <modality>",
-				"(0008,103E) [LO] <seriesDescription>" };
-		String imageColumns[] = { "(0008,0018) [UI] <SOP Instance UID>", "(0020,0010) [SH] <studyId>",
-				"(0020,000E)[UI] <seriesId>", "(0008,0008) [CS] <imageType>", "(0028,0010)[US] <rows>",
-				"(0028,0011) [US] <columns>", "(0028,0100)[US] <bitsAllocated>", "(0028,0101) [US] <bitsStored>" };
-
-		JPanel panelDemo = new JPanel();
-		tabbedPane.addTab(patientStudyTags.get(1) + "_" + patientStudyTags.get(5), null, panelDemo, null);
-		panelDemo.setLayout(null);
+		String patientStudyColoumns[] = { "(0010,0020) [LO] <patientId> ", "(0010,0010) [PN] <patientName> ",
+				"(0010,0030) [DA] <patientDOB> ", "(0008,0050) [SH] <accessionNumber> ", "(0020,0010) [SH] <studyId> ",
+				"(0008,1030) [LO] <studyDescription> ", "(0032,0032) [DA] <studyDateTime> " };
+		String seriesColumns[] = { "(0020,000E) [UI] <seriesId> ", "(0020,0010) [SH] <studyId> ",
+				"(0020,0011) [IS] <seriesNumber> ", "(0008,0060) [CS] <modality> ",
+				"(0008,103E) [LO] <seriesDescription> " };
+		String imageColumns[] = { "(0008,0018) [UI] <SOP Instance UID> ", "(0020,0010) [SH] <studyId> ",
+				"(0020,000E)[UI] <seriesId> ", "(0008,0008) [CS] <imageType> ", "(0028,0010)[US] <rows> ",
+				"(0028,0011) [US] <columns> ", "(0028,0100)[US] <bitsAllocated> ", "(0028,0101) [US] <bitsStored> " };
+		/////////////////////////////////
 
 		for (int i = 0; i < patientStudyTags.size(); ++i) {
 			studyTree.insertNodeInto(
 					new DefaultMutableTreeNode(patientStudyColoumns[i] + "[" + patientStudyTags.get(i) + "]", false),
 					root, i);
+
 		}
+
 		DefaultMutableTreeNode seriesParent = new DefaultMutableTreeNode(seriesTags.get(0), true);
 		studyTree.insertNodeInto(seriesParent, root, patientStudyTags.size());
 		for (int i = 0, j = 0; i < seriesTags.size(); ++i) {
-			while (i != 1) {
+			if (i != 1) {
 				studyTree.insertNodeInto(
 						new DefaultMutableTreeNode(seriesColumns[i] + "[" + seriesTags.get(i) + "]", false),
 						seriesParent, j);
@@ -193,21 +219,35 @@ public class ReaderHome extends JFrame {
 
 		DefaultMutableTreeNode imageParent = new DefaultMutableTreeNode(imageTags.get(0), true);
 		studyTree.insertNodeInto(imageParent, seriesParent, seriesTags.size() - 1);
+
 		for (int i = 0, j = 0; i < imageTags.size(); ++i) {
-			while (i != 1 || i != 2) {
+			if (i != 1 && i != 2) {
 				studyTree.insertNodeInto(
-						new DefaultMutableTreeNode(imageColumns[i] + "[" + seriesTags.get(i) + "]", false),
-						seriesParent, j);
+						new DefaultMutableTreeNode(imageColumns[i] + "[" + imageTags.get(i) + "]", false), imageParent,
+						j);
 				j++;
 			}
 		}
+
+		/////////////////////////////////
+		JPanel tabPanel = new JPanel(new BorderLayout());
+		tabPanel.setOpaque(false);
+				
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(0, 0, 1037, 579);
-		panelDemo.add(scrollPane);
+		tabPanel.add(scrollPane);
 		JTree tree = new JTree(studyTree);
 		scrollPane.setViewportView(tree);
+		tabbedPane.addTab(patientStudyTags.get(1) + "_" + patientStudyTags.get(5), null, tabPanel, null);
+		tabPanel.setLayout(null);
 
-		//////////////
+		int index = tabbedPane.getTabCount() - 1;
+		ClosableTab tabHeader = new ClosableTab(tabbedPane, index);
+
+		tabHeader.apply();
 		
+		tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+		/////////////////////////////////
+
 	}
 }
