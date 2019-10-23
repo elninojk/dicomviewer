@@ -19,6 +19,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.JTree;
+import javax.swing.JViewport;
 import javax.swing.JTabbedPane;
 import javax.swing.tree.DefaultTreeModel;
 
@@ -161,6 +162,11 @@ public class ReaderHome extends JFrame {
 		mnCopy.add(mntmTagValue);
 
 		JMenuItem mntmFind = new JMenuItem("Find");
+		mntmFind.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+			}
+		});
 		mntmFind.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
 		mnEdit.add(mntmFind);
 		contentPane = new JPanel();
@@ -249,5 +255,57 @@ public class ReaderHome extends JFrame {
 		tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
 		/////////////////////////////////
 
+
+		
+	}
+	
+	public void findString(String string, int searchIndex) {
+		
+		int index = tabbedPane.getSelectedIndex();
+		JPanel p = (JPanel)tabbedPane.getSelectedComponent();
+		JScrollPane scroll = (JScrollPane)p.getComponent(0);
+		JViewport viewport = scroll.getViewport(); 
+		JTree tree = (JTree)viewport.getView();
+		DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
+		DefaultTreeModel newTree = null;
+		DefaultMutableTreeNode root = (DefaultMutableTreeNode) treeModel.getRoot();
+		newTree.setRoot(root);
+		int studyChildren = 7, seriesChildren = 4, imageChildren = 6;
+		
+		for(int i = 0; i<studyChildren; ++i ) {
+			Object child = treeModel.getChild(root, i);
+			if(child) {
+				//////////////
+			}
+			DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child, false);
+			newTree.insertNodeInto(childNode, root, i);
+		}
+		
+		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) treeModel.getChild(root, studyChildren);
+		newTree.insertNodeInto(parent, root, studyChildren);
+		
+		for(int i = 0; i<seriesChildren; ++i ) {
+			Object child = treeModel.getChild(parent, i);
+			if(child) {
+				//////////////
+			}
+			DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child, false);
+			newTree.insertNodeInto(childNode, parent, i);
+			
+		}
+		
+		DefaultMutableTreeNode imageParent = (DefaultMutableTreeNode) treeModel.getChild(parent, seriesChildren);
+		newTree.insertNodeInto(imageParent, parent, seriesChildren);
+		
+		for(int i = 0; i<imageChildren; ++i ) {
+			Object child = treeModel.getChild(imageParent, i);
+			if(child) {
+				//////////////
+			}
+			DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child, false);
+			newTree.insertNodeInto(childNode, imageParent, i);
+			
+		}
+		
 	}
 }
