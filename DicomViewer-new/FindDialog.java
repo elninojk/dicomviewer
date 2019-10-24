@@ -1,8 +1,6 @@
 package view;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -10,13 +8,13 @@ import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
-import javax.swing.JTextArea;
 import javax.swing.JLabel;
 
 public class FindDialog extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
 	private JTextField textField;
+	private JLabel lblNewLabel;
 
 	/**
 	 * Launch the application.
@@ -25,6 +23,7 @@ public class FindDialog extends JDialog {
 		try {
 			FindDialog dialog = new FindDialog();
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
 			dialog.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -42,7 +41,20 @@ public class FindDialog extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(null);
 		this.setAlwaysOnTop(true);
-		
+		this.setLocation(800, 150);
+
+		lblNewLabel = new JLabel("New label");
+		lblNewLabel.setBounds(21, 42, 180, 23);
+		lblNewLabel.setText("");
+		contentPanel.add(lblNewLabel);
+		{
+			JPanel buttonPane = new JPanel();
+			getContentPane().add(buttonPane, BorderLayout.SOUTH);
+			{
+				buttonPane.setLayout(null);
+			}
+		}
+
 		textField = new JTextField();
 		textField.setBounds(21, 11, 180, 20);
 		contentPanel.add(textField);
@@ -54,7 +66,18 @@ public class FindDialog extends JDialog {
 			findButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					////////////////
-					ReaderHome.findString(textField.getText(), 1);
+					lblNewLabel.setText("");
+					if ("".equals(textField.getText()) || textField.getText() == null) {
+						lblNewLabel.setText("Empty String");
+						lblNewLabel.setVisible(true);
+					} else {
+						
+						try {
+							ReaderHome.findString(textField.getText());
+						} catch (Exception e) {
+							lblNewLabel.setText("String Not Found");;
+						}
+					}
 					///////////////
 				}
 			});
@@ -66,20 +89,15 @@ public class FindDialog extends JDialog {
 		contentPanel.add(closeButton);
 		closeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				try {
+					ReaderHome.findString(null);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				dispose();
 			}
 		});
-		
-		JLabel lblNewLabel = new JLabel("New label");
-		lblNewLabel.setBounds(21, 42, 180, 23);
-		lblNewLabel.setText("4/6");
-		contentPanel.add(lblNewLabel);
-		{
-			JPanel buttonPane = new JPanel();
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
-			{
-				buttonPane.setLayout(null);
-			}
-		}
+
 	}
+
 }

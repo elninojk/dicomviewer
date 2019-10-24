@@ -3,7 +3,6 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JDialog;
@@ -174,6 +173,7 @@ public class ReaderHome extends JFrame {
 					e.printStackTrace();
 				}
 				
+				
 			}
 		});
 		mntmFind.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
@@ -262,21 +262,18 @@ public class ReaderHome extends JFrame {
 		scrollPane.setBounds(0, 0, 1037, 579);
 		tabPanel.add(scrollPane);
 		
-//		tree.setCellRenderer(new MyTreeCellRenderer(null));
 		scrollPane.setViewportView(tree);
 		tabbedPane.addTab(tabName, null, tabPanel, null);
 		tabPanel.setLayout(null);
-
-		
+	
 		ClosableTab tabHeader = new ClosableTab(tabbedPane, index);
-
 		tabHeader.apply();
 		
 		tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
 	}
 	
 	
-	public static void findString(String searchString, int searchIndex) {
+	public static void findString(String searchString) throws Exception {
 		
 		int index = tabbedPane.getSelectedIndex();
 		String tabName = tabbedPane.getTitleAt(index);
@@ -284,8 +281,15 @@ public class ReaderHome extends JFrame {
 		JScrollPane scroll = (JScrollPane)p.getComponent(0);
 		JViewport viewport = scroll.getViewport(); 
 		JTree tree = (JTree)viewport.getView();
-		tree.setCellRenderer(new MyTreeCellRenderer(searchString));
+		
+		TreeCellColorRenderer treeColor = new TreeCellColorRenderer(searchString);
+		tree.setCellRenderer(treeColor);
+		if(! treeColor.isFlag() && searchString != null) {
+			throw new Exception("String Not Found");
+		}
+		
 		tabbedPane.remove(index);
+		System.out.println("Paint");
 		paintTab(tree, index, tabName);
 
 		
