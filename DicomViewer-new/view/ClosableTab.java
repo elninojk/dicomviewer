@@ -50,6 +50,8 @@ public class ClosableTab extends JPanel implements ActionListener{
             pane.remove(pane.indexOfTabComponent(this));
             pane.revalidate();
             pane.repaint();
+            System.out.println("Tab Closing");
+            ReaderHome.enableComponents();
         }
     }
 

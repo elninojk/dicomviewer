@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -33,14 +34,19 @@ import java.awt.event.InputEvent;
 
 public class ReaderHome extends JFrame {
 
-	private JPanel contentPane;
+	private static JPanel contentPane;
+	private static JTabbedPane tabbedPane;
+	private static ReaderHome frame = null;
+	private static JMenuItem mntmDownloadPixelData;
+	private static JMenu mnCopy;
+	private static JMenuItem mntmFind;
+	
 
 	public JTabbedPane getTabbedPane() {
 		return tabbedPane;
 	}
 
-	protected JTabbedPane tabbedPane;
-	static ReaderHome frame = null;
+	
 
 	/**
 	 * Launch the application.
@@ -116,7 +122,8 @@ public class ReaderHome extends JFrame {
 		mntmConvertToTextFile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_MASK));
 		mnFile.add(mntmConvertToTextFile);
 
-		JMenuItem mntmDownloadPixelData = new JMenuItem("Download Pixel Data");
+		mntmDownloadPixelData = new JMenuItem("Download Pixel Data");
+		mntmDownloadPixelData.setEnabled(false);
 		mntmDownloadPixelData.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
 		mnFile.add(mntmDownloadPixelData);
 
@@ -143,7 +150,8 @@ public class ReaderHome extends JFrame {
 		mnEdit.setForeground(new Color(0, 0, 0));
 		menuBar.add(mnEdit);
 
-		JMenu mnCopy = new JMenu("Copy");
+		mnCopy = new JMenu("Copy");
+		mnCopy.setEnabled(false);
 		mnEdit.add(mnCopy);
 
 		JMenuItem mntmText = new JMenuItem("Text");
@@ -161,9 +169,18 @@ public class ReaderHome extends JFrame {
 		JMenuItem mntmTagValue = new JMenuItem("Tag Value");
 		mnCopy.add(mntmTagValue);
 
-		JMenuItem mntmFind = new JMenuItem("Find");
+		mntmFind = new JMenuItem("Find");
+		mntmFind.setEnabled(false);
 		mntmFind.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				try {
+					FindDialog dialog = new FindDialog();
+					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					dialog.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
 				
 			}
 		});
@@ -235,75 +252,69 @@ public class ReaderHome extends JFrame {
 			}
 		}
 
-		/////////////////////////////////
-		JPanel tabPanel = new JPanel(new BorderLayout());
-		tabPanel.setOpaque(false);
-				
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(0, 0, 1037, 579);
-		tabPanel.add(scrollPane);
+
+		//////////////////////////////////
 		JTree tree = new JTree(studyTree);
-		scrollPane.setViewportView(tree);
-		tabbedPane.addTab(patientStudyTags.get(1) + "_" + patientStudyTags.get(5), null, tabPanel, null);
-		tabPanel.setLayout(null);
-
-		int index = tabbedPane.getTabCount() - 1;
-		ClosableTab tabHeader = new ClosableTab(tabbedPane, index);
-
-		tabHeader.apply();
-		
-		tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+		paintTab(tree, tabbedPane.getTabCount(), patientStudyTags.get(1) + "_" + patientStudyTags.get(5));
 		/////////////////////////////////
 
 
 		
 	}
 	
-	public void findString(String string, int searchIndex) {
+	public static void paintTab(JTree tree,int index, String tabName) {
+		JPanel tabPanel = new JPanel(new BorderLayout());
+		tabPanel.setOpaque(false);
+				
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(0, 0, 1037, 579);
+		tabPanel.add(scrollPane);
+		
+		scrollPane.setViewportView(tree);
+		tabbedPane.addTab(tabName, null, tabPanel, null);
+		tabPanel.setLayout(null);
+	
+		ClosableTab tabHeader = new ClosableTab(tabbedPane, index);
+		tabHeader.apply();
+		
+		enableComponents();
+		tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+	}
+	
+	
+	public static void findString(String searchString) throws Exception {
 		
 		int index = tabbedPane.getSelectedIndex();
-		JPanel p = (JPanel)tabbedPane.getSelectedComponent();
+		String tabName = tabbedPane.getTitleAt(index);
+		JPanel p = (JPanel)tabbedPane.getSelectedComponent();	
 		JScrollPane scroll = (JScrollPane)p.getComponent(0);
 		JViewport viewport = scroll.getViewport(); 
 		JTree tree = (JTree)viewport.getView();
-		DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-		DefaultTreeModel newTree = null;
-		DefaultMutableTreeNode root = (DefaultMutableTreeNode) treeModel.getRoot();
-		newTree.setRoot(root);
-		int studyChildren = 7, seriesChildren = 4, imageChildren = 6;
 		
-		for(int i = 0; i<studyChildren; ++i ) {
-			Object child = treeModel.getChild(root, i);
-			if(child) {
-				//////////////
-			}
-			DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child, false);
-			newTree.insertNodeInto(childNode, root, i);
+		TreeCellColorRenderer treeColor = new TreeCellColorRenderer(searchString);
+		tree.setCellRenderer(treeColor);
+		if(! treeColor.isFlag() && searchString != null) {
+			throw new Exception("String Not Found");
 		}
 		
-		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) treeModel.getChild(root, studyChildren);
-		newTree.insertNodeInto(parent, root, studyChildren);
+		tabbedPane.remove(index);
+		System.out.println("Paint");
+		paintTab(tree, index, tabName);
+
 		
-		for(int i = 0; i<seriesChildren; ++i ) {
-			Object child = treeModel.getChild(parent, i);
-			if(child) {
-				//////////////
-			}
-			DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child, false);
-			newTree.insertNodeInto(childNode, parent, i);
-			
+	}
+	
+	public static void enableComponents() {
+		if(tabbedPane.getTabCount() > 0) {	
+			mntmDownloadPixelData.setEnabled(true);
+			mnCopy.setEnabled(true);
+			mntmFind.setEnabled(true);
 		}
 		
-		DefaultMutableTreeNode imageParent = (DefaultMutableTreeNode) treeModel.getChild(parent, seriesChildren);
-		newTree.insertNodeInto(imageParent, parent, seriesChildren);
-		
-		for(int i = 0; i<imageChildren; ++i ) {
-			Object child = treeModel.getChild(imageParent, i);
-			if(child) {
-				//////////////
-			}
-			DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(child, false);
-			newTree.insertNodeInto(childNode, imageParent, i);
+		else {
+			mntmDownloadPixelData.setEnabled(false);
+			mnCopy.setEnabled(false);
+			mntmFind.setEnabled(false);
 			
 		}
 		
