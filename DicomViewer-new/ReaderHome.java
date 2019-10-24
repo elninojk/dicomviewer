@@ -1,32 +1,17 @@
 package view;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.datatransfer.StringSelection;
-
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.plaf.basic.BasicButtonUI;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JToolBar;
-import javax.swing.JScrollBar;
-import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.awt.event.ActionEvent;
-import javax.swing.JList;
 import java.awt.Color;
 import java.awt.Desktop;
 
@@ -36,18 +21,12 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.JTree;
-import javax.swing.ListSelectionModel;
+import javax.swing.JViewport;
 import javax.swing.JTabbedPane;
 import javax.swing.tree.DefaultTreeModel;
 
-import com.sun.javafx.tk.Toolkit;
-
 import controller.DicomViewerController;
-import dao.PatientStudyDAO;
 import model.DCMParser;
-import model.PatientStudy;
-import dao.ImageDAO;
-
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
@@ -57,11 +36,12 @@ import java.awt.event.InputEvent;
 public class ReaderHome extends JFrame {
 
 	private JPanel contentPane;
+
 	public JTabbedPane getTabbedPane() {
 		return tabbedPane;
 	}
 
-	protected JTabbedPane tabbedPane;
+	public static JTabbedPane tabbedPane;
 	static ReaderHome frame = null;
 
 	/**
@@ -184,6 +164,18 @@ public class ReaderHome extends JFrame {
 		mnCopy.add(mntmTagValue);
 
 		JMenuItem mntmFind = new JMenuItem("Find");
+		mntmFind.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					FindDialog dialog = new FindDialog();
+					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					dialog.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+		});
 		mntmFind.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
 		mnEdit.add(mntmFind);
 		contentPane = new JPanel();
@@ -201,8 +193,7 @@ public class ReaderHome extends JFrame {
 
 	public void display(File dicomFile) throws Exception {
 
-		//////////////
-
+		////////////////////////////////
 		DicomViewerController controllerObj = new DicomViewerController(new DCMParser());
 		controllerObj.parseDCMFile(dicomFile);
 		ArrayList<String> patientStudyTags = controllerObj.getPatientStudyTags();
@@ -222,45 +213,7 @@ public class ReaderHome extends JFrame {
 				"(0020,000E)[UI] <seriesId> ", "(0008,0008) [CS] <imageType> ", "(0028,0010)[US] <rows> ",
 				"(0028,0011) [US] <columns> ", "(0028,0100)[US] <bitsAllocated> ", "(0028,0101) [US] <bitsStored> " };
 		/////////////////////////////////
-		JPanel tabPanel = new JPanel(new BorderLayout());
-		tabPanel.setOpaque(false);
-		JButton tabButton = new JButton("X");
-		
-        tabPanel.setOpaque(false);
-        
-        //make JLabel read titles from JTabbedPane
-//        JLabel label = new JLabel() {
-//            public String getText() {
-//                int i = pane.indexOfTabComponent(ButtonTabComponent.this);
-//                if (i != -1) {
-//                    return pane.getTitleAt(i);
-//                }
-//                return null;
-//            }
 
-		int size = 17;
-		tabButton.setPreferredSize(new Dimension(size, size));
-		tabButton.setToolTipText("close this tab");
-		// Make the button looks the same for all Laf's
-		tabButton.setUI(new BasicButtonUI());
-		// Make it transparent
-		tabButton.setContentAreaFilled(false);
-		// No need to be focusable
-		tabButton.setFocusable(false);
-		tabButton.setBorder(BorderFactory.createEtchedBorder());
-		tabButton.setBorderPainted(false);
-		// Making nice rollover effect
-		// we use the same listener for all buttons
-		////////// tabButton.addMouseListener(buttonMouseListener);
-		tabButton.setRolloverEnabled(true);
-		// Close the proper tab by clicking the button
-		////////// tabButton.addActionListener(this);
-
-		tabPanel.add(tabButton);
-		tabbedPane.addTab(patientStudyTags.get(1) + "_" + patientStudyTags.get(5), null, tabPanel, null);
-		tabPanel.setLayout(null);
-
-		///////////////////////////////////
 		for (int i = 0; i < patientStudyTags.size(); ++i) {
 			studyTree.insertNodeInto(
 					new DefaultMutableTreeNode(patientStudyColoumns[i] + "[" + patientStudyTags.get(i) + "]", false),
@@ -290,82 +243,51 @@ public class ReaderHome extends JFrame {
 				j++;
 			}
 		}
+
+
+		//////////////////////////////////
+		JTree tree = new JTree(studyTree);
+		paintTab(tree, tabbedPane.getTabCount(), patientStudyTags.get(1) + "_" + patientStudyTags.get(5));
+		/////////////////////////////////
+
+
+		
+	}
+	
+	public static void paintTab(JTree tree,int index, String tabName) {
+		JPanel tabPanel = new JPanel(new BorderLayout());
+		tabPanel.setOpaque(false);
+				
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(0, 0, 1037, 579);
 		tabPanel.add(scrollPane);
-		JTree tree = new JTree(studyTree);
-		scrollPane.setViewportView(tree);
-		tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
-
-		//////////////
 		
-//		tree.setShowsRootHandles(true);
-//		tree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
-//
-//			public void valueChanged(TreeSelectionEvent e) {
-//				DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-//				StringSelection stringSelection = new StringSelection("");
-//				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
-//				 
-//				mntmText.addActionListener(new ActionListener() { // TEXT
-//					public void actionPerformed(ActionEvent ev) {
-//						
-//						StringSelection stringSelection = new StringSelection(selectedNode.getUserObject().toString());
-//						Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-//						clipboard.setContents(stringSelection, null);
-//				
-//					}
-//				});
-//				mntmTagName.addActionListener(new ActionListener() { // TAG NAME
-//					public void actionPerformed(ActionEvent ev) {
-//
-//						String str = selectedNode.toString();
-//						String tagName = str.substring(str.indexOf("<") + 1, str.indexOf(">"));
-//						StringSelection stringSelection = new StringSelection(tagName);
-//						Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-//						clipboard.setContents(stringSelection, null);
-//
-//					}
-//				});
-//				mntmTagValue.addActionListener(new ActionListener() { // TAG VALUE
-//					public void actionPerformed(ActionEvent ev) {
-//
-//						String str = selectedNode.toString();
-//						String[] tagName = str.split(">");
-//						for (int i = 0; i < tagName.length; i++) {
-//
-//							StringSelection stringSelection = new StringSelection(tagName[i]);
-//							Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-//							clipboard.setContents(stringSelection, null);
-//						}
-//
-//					}
-//				});
-//				mntmTag.addActionListener(new ActionListener() { // TAG
-//					public void actionPerformed(ActionEvent ev) {
-//
-//						String str = selectedNode.toString();
-//						String tag = str.substring(str.indexOf("(") + 1, str.indexOf(")"));
-//						StringSelection stringSelection = new StringSelection(tag);
-//						Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-//						clipboard.setContents(stringSelection, null);
-//
-//					}
-//				});
-//				mntmTagVr.addActionListener(new ActionListener() { // TAG VR
-//					public void actionPerformed(ActionEvent ev) {
-//
-//						String str = selectedNode.toString();
-//						String tagVR = str.substring(str.indexOf("[") + 1, str.indexOf("]"));
-//						StringSelection stringSelection = new StringSelection(tagVR);
-//						Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-//						clipboard.setContents(stringSelection, null);
-//
-//					}
-//				});
-//
-//			}
-//		});
+//		tree.setCellRenderer(new MyTreeCellRenderer(null));
+		scrollPane.setViewportView(tree);
+		tabbedPane.addTab(tabName, null, tabPanel, null);
+		tabPanel.setLayout(null);
 
+		
+		ClosableTab tabHeader = new ClosableTab(tabbedPane, index);
+
+		tabHeader.apply();
+		
+		tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
+	}
+	
+	
+	public static void findString(String searchString, int searchIndex) {
+		
+		int index = tabbedPane.getSelectedIndex();
+		String tabName = tabbedPane.getTitleAt(index);
+		JPanel p = (JPanel)tabbedPane.getSelectedComponent();	
+		JScrollPane scroll = (JScrollPane)p.getComponent(0);
+		JViewport viewport = scroll.getViewport(); 
+		JTree tree = (JTree)viewport.getView();
+		tree.setCellRenderer(new MyTreeCellRenderer(searchString));
+		tabbedPane.remove(index);
+		paintTab(tree, index, tabName);
+
+		
 	}
 }
