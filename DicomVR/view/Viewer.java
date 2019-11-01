@@ -110,11 +110,7 @@ public class Viewer extends JFrame {
 					for (i = 0; i < 90; i = i + 2) {
 						progressBar.setValue(i);
 						progressBar.setString("Importing...................");
-						System.out.println(progressBar.getString());
-						progressBar.update(progressBar.getGraphics());
-						System.out.println(
-								Thread.currentThread().getName() + "    " + i + "    " + progressBar.getValue());
-						// Thread.sleep(10);
+						progressBar.update(progressBar.getGraphics());						
 					}
 					try {
 						imp.join();
@@ -124,13 +120,12 @@ public class Viewer extends JFrame {
 
 					progressBar.setValue(95);
 					progressBar.update(progressBar.getGraphics());
-					System.out.println(Thread.currentThread().getName());
-
+					
 					i = 100;
 					progressBar.setValue(i);
 					progressBar.setString("Importing Completed");
 					progressBar.update(progressBar.getGraphics());
-					System.out.println(i + "Importing Completed");
+					
 					try {
 						Thread.sleep(1000);
 					} catch (Exception e) {
