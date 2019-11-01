@@ -29,7 +29,7 @@ public class DicomVRController {
 	
 	public static Logger getLogger() throws SecurityException, IOException
 	{
-		//logger.addHandler(LoggerFormat.getFileHandler());
+		logger.addHandler(LoggerFormat.getFileHandler());
 		logger.setLevel(Level.FINE);
 		return logger;
 	}
@@ -41,7 +41,7 @@ public class DicomVRController {
 
 	public DicomVRController(DCMParser dcmParser) throws SecurityException, IOException  {		
 		DicomVRController.dcmParser = dcmParser;
-		//logger.addHandler(LoggerFormat.getFileHandler());
+		logger.addHandler(LoggerFormat.getFileHandler());
 		logger.setLevel(Level.FINE);
 		logger.info("Controller initiated...!");		
 	}
